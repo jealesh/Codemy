@@ -69,6 +69,17 @@ class LoginActivity : ComponentActivity() {
                     showSuccess("Вход успешен! Добро пожаловать")
                     startActivity(Intent(this@LoginActivity, MainScreenActivity::class.java))
                     finish() // закрываем экран логина
+                    // Сохраняем userId и флаг авторизации
+                    val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
+                    sharedPref.edit().apply {
+                        putLong("user_id", response.userId!!)
+                        putBoolean("is_logged_in", true)
+                        apply()
+                    }
+
+// Переход на главный экран
+                    startActivity(Intent(this@LoginActivity, MainScreenActivity::class.java))
+                    finish()
                 } else {
                     // Ошибка от сервера
                     when (response.message) {

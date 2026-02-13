@@ -14,16 +14,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.sql.Connection
 
-// Exposed
+// Exposed только для /register
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-
-
-// Твои таблицы
 import tables.Users
+import tables.UserStats
 
-// Если используешь другие сущности/таблицы — добавляй сюда же
+// Модели
 @Serializable
 data class RegisterRequest(
     val fullName: String,
@@ -51,6 +48,27 @@ data class LoginResponse(
     val userId: Long? = null
 )
 
+// ← Модель для ответа статистики (обязательно @Serializable)
+@Serializable
+data class UserStatsResponse(
+    val total_xp: Long,
+    val level: Int,
+    val weekly_xp: Int,
+    val last_reset_week: String? = null,
+    val updated_at: String? = null
+)
+
+@Serializable
+data class UserProfileResponse(
+    val full_name: String = "",
+    val username: String = "",
+    val total_xp: Long = 0,
+    val level: Int = 1,
+    val weekly_xp: Int = 0,
+    val last_reset_week: String? = null,
+    val updated_at: String? = null
+)
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         module()
@@ -58,7 +76,7 @@ fun main() {
 }
 
 fun Application.module() {
-    DatabaseFactory.connect()  // подключаемся к БД
+    DatabaseFactory.connect()
 
     install(ContentNegotiation) {
         json(Json {
@@ -91,20 +109,28 @@ fun Application.module() {
                     val insertStatement = Users.insert {
                         it[username] = request.username
                         it[email] = request.email
-                        it[passwordHash] = request.password   // потом добавим хеширование
+                        it[passwordHash] = request.password
                         it[fullName] = request.fullName
                         it[age] = request.age
                     }
+                    insertStatement[Users.id].value
+                }
 
-                    insertStatement[Users.id].value   // получаем сгенерированный ID
+                // ← Автоматически создаём статистику для нового пользователя
+                transaction {
+                    UserStats.insert {
+                        it[userId] = newUserId
+                        it[totalXp] = 0
+                        it[level] = 1
+                        it[weeklyXp] = 0
+                        it[lastResetWeek] = null
+                        it[updatedAt] = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
+                    }
                 }
 
                 call.respond(
                     HttpStatusCode.Created,
-                    RegisterResponse(
-                        message = "User successfully created",
-                        userId = newUserId
-                    )
+                    RegisterResponse("User successfully created", newUserId)
                 )
             } catch (e: Exception) {
                 println("Registration error: ${e.message}")
@@ -114,17 +140,18 @@ fun Application.module() {
                 )
             }
         }
+
         post("/login") {
             try {
                 val request = call.receive<LoginRequest>()
 
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                SELECT id, password_hash 
-                FROM app.users 
-                WHERE username = ? OR email = ?
-                LIMIT 1
-            """.trimIndent())
+                        SELECT id, password_hash 
+                        FROM app.users 
+                        WHERE username = ? OR email = ?
+                        LIMIT 1
+                    """.trimIndent())
 
                     stmt.setString(1, request.loginOrEmail)
                     stmt.setString(2, request.loginOrEmail)
@@ -162,6 +189,57 @@ fun Application.module() {
                 )
             }
         }
-    }
 
+        // ← Только один маршрут для статистики (JDBC)
+        get("/user/profile/{userId}") {
+            val userId = call.parameters["userId"]?.toLongOrNull() ?: return@get call.respond(
+                HttpStatusCode.BadRequest,
+                mapOf("error" to "Неверный userId")
+            )
+
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    val stmt = conn.prepareStatement("""
+                SELECT 
+                    u.full_name, u.username,
+                    us.total_xp, us.level, us.weekly_xp, us.last_reset_week, us.updated_at
+                FROM app.users u
+                LEFT JOIN app.user_stats us ON u.id = us.user_id
+                WHERE u.id = ?
+            """.trimIndent())
+
+                    stmt.setLong(1, userId)
+
+                    val rs = stmt.executeQuery()
+
+                    if (!rs.next()) {
+                        call.respond(
+                            HttpStatusCode.NotFound,
+                            mapOf("error" to "Пользователь не найден")
+                        )
+                        return@get
+                    }
+
+                    val response = UserProfileResponse(
+                        full_name = rs.getString("full_name") ?: "",
+                        username = rs.getString("username") ?: "",
+                        total_xp = rs.getLong("total_xp"),
+                        level = rs.getInt("level"),
+                        weekly_xp = rs.getInt("weekly_xp"),
+                        last_reset_week = rs.getDate("last_reset_week")?.toString(),
+                        updated_at = rs.getTimestamp("updated_at")?.toString()
+                    )
+
+                    call.respond(response)  // ← теперь объект data class
+                }
+            } catch (e: Exception) {
+                println("Profile error for user $userId: ${e.message}")
+                e.printStackTrace()
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to "Ошибка сервера: ${e.message}")
+                )
+            }
+        }
+    }
 }
