@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0/full/pyodide.js"></script>
+</head>
+<body style="margin:0; padding:10px; background:#111; color:#0f0; font-family:monospace;">
+<pre id="output">Python загружается...</pre>
+
+<script type="text/javascript">
+    let pyodide;
+    let outputElement = document.getElementById("output");
+    window.isPyodideReady = false;
+
+    async function main() {
+        try {
+            outputElement.innerText = "Загрузка Python...";
+            pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.26.0/full/"
+            });
+
+            // Настраиваем stdout
+            pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+            `);
+
+            outputElement.innerText = "Python готов! Вводи код и жми 'Выполнить'.";
+            window.isPyodideReady = true;
+        } catch (err) {
+            outputElement.innerText = "Не удалось загрузить Python: " + err.message;
+        }
+    }
+    main();
+
+    window.runPython = function(code) {
+    if (!window.isPyodideReady) {
+        return "Python ещё загружается... Подожди 10–30 секунд.";
+    }
+
+    let exitCode = 0;
+    let outputText = "";
+
+    try {
+        pyodide.runPython("sys.stdout = StringIO()");
+        let result = pyodide.runPython(code);
+        let stdout = pyodide.runPython("sys.stdout.getvalue()") || "";
+
+        outputText = stdout.trim() + (result !== undefined ? "\nРезультат: " + result : "");
+        outputText = outputText || "Код выполнен, но ничего не вывелось.";
+    } catch (err) {
+        exitCode = 1;
+        let errorMsg = err.message || "Неизвестная ошибка";
+
+        // Фильтруем ошибки для новичков
+        if (errorMsg.includes("SyntaxError") || errorMsg.includes("unterminated string")) {
+            errorMsg = "Ошибка в синтаксисе: " + errorMsg.split('\n').pop() + "\n\nПроверь кавычки, скобки и двоеточия.";
+        } else if (errorMsg.includes("NameError")) {
+            errorMsg = "Переменная не найдена: " + errorMsg.split('\n').pop() + "\n\nВозможно, ты забыл её объявить раньше.";
+        } else if (errorMsg.includes("TypeError")) {
+            errorMsg = "Неправильный тип данных: " + errorMsg.split('\n').pop() + "\n\nПроверь, что ты используешь числа/строки правильно.";
+        } else if (errorMsg.includes("IndentationError")) {
+            errorMsg = "Ошибка отступов: " + errorMsg.split('\n').pop() + "\n\nПроверь пробелы перед строками.";
+        } else {
+            errorMsg = "Ошибка в коде: " + errorMsg.split('\n').pop() + "\n\nПопробуй исправить и запустить снова.";
+        }
+
+        outputText = errorMsg;
+    }
+
+    // Добавляем финальную строку как в консоли
+    outputText += "\n\nProcess finished with exit code " + exitCode;
+
+    return outputText;
+};
+</script>
+</body>
+</html>

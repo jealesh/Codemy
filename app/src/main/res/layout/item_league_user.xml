@@ -1,0 +1,53 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="6dp"
+    android:clipToPadding="false"
+    android:elevation="2dp">
+
+    <!-- Место (ранг) -->
+    <TextView
+        android:id="@+id/userRank"
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp"
+        android:fontFamily="@font/nunitosans"
+        android:gravity="center" />
+
+    <!-- Аватар -->
+    <ImageView
+        android:id="@+id/userAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_avatar_placeholder"
+        android:layout_marginEnd="12dp" />
+
+    <!-- Имя и XP -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="16sp"
+            android:fontFamily="@font/rubik"/>
+
+        <TextView
+            android:id="@+id/userXPWeekly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorSecondary"
+            android:textSize="14sp"
+            android:text="XP за 7 дней"
+            android:fontFamily="@font/rubik"/>
+    </LinearLayout>
+</LinearLayout>

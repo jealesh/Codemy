@@ -1,0 +1,99 @@
+package com.inc.codemy
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.webkit.WebView
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+
+class SandboxActivity : AppCompatActivity() {
+
+    private lateinit var languageSpinner: Spinner
+    private lateinit var inputCode: EditText
+    private lateinit var btnRunCode: Button
+    private lateinit var webViewPyodide: WebView
+    private lateinit var outputResult: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_sandbox)
+
+        languageSpinner = findViewById(R.id.languageSpinner)
+        inputCode = findViewById(R.id.inputCode)
+        btnRunCode = findViewById(R.id.btnRunCode)
+        webViewPyodide = findViewById(R.id.webViewPyodide)
+        outputResult = findViewById(R.id.outputResult)
+
+        // Настройка Spinner
+        val languages = arrayOf("Python", "Java", "C#")
+        languageSpinner.adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
+
+        // Настройка WebView для Pyodide
+        webViewPyodide.settings.javaScriptEnabled = true
+        webViewPyodide.settings.domStorageEnabled = true
+        webViewPyodide.loadUrl("file:///android_res/raw/pyodide_runner.html")
+
+        btnRunCode.setOnClickListener {
+            val code = inputCode.text.toString().trim()
+            val lang = languageSpinner.selectedItem.toString()
+
+            if (code.isEmpty()) {
+                outputResult.text = "Напиши код!"
+                outputResult.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        android.R.color.holo_red_light
+                    )
+                )
+                return@setOnClickListener
+            }
+
+            when (lang) {
+                "Python" -> runPython(code)
+                "Java", "C#" -> {
+                    outputResult.text =
+                        "$lang пока не поддерживается\n(скоро запустим через сервер)"
+                    outputResult.setTextColor(
+                        ContextCompat.getColor(
+                            this,
+                            android.R.color.holo_orange_light
+                        )
+                    )
+                }
+            }
+        }
+
+        // Навигация
+        findViewById<TextView>(R.id.navHome).setOnClickListener {
+            startActivity(Intent(this, MainScreenActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.navProfile).setOnClickListener {
+            startActivity(Intent(this, ProfileActivity::class.java))
+        }
+
+        findViewById<TextView>(R.id.navTrophy).setOnClickListener {
+            startActivity(Intent(this, LeagueActivity::class.java))
+        }
+    }
+
+    private fun runPython(code: String) {
+        webViewPyodide.visibility = View.VISIBLE
+        findViewById<ScrollView>(R.id.scrollOutput).visibility = View.GONE
+
+        webViewPyodide.evaluateJavascript("runPython(`$code`)", { result ->
+            val cleanResult = result
+                ?.replace("\"", "")
+                ?.replace("\\n", "\n")
+                ?.replace("\\r", "") ?: "Нет вывода"
+
+            outputResult.text = cleanResult
+            outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
+            findViewById<ScrollView>(R.id.scrollOutput).visibility = View.VISIBLE
+            webViewPyodide.visibility = View.GONE
+        })
+    }
+}
