@@ -7,8 +7,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class LessonsAdapter(
-    private var lessons: List<Lesson>
+    private var lessons: List<Lesson> = emptyList()
 ) : RecyclerView.Adapter<LessonsAdapter.LessonViewHolder>() {
+
+    val currentLessons: List<Lesson>
+        get() = lessons
+
 
     class LessonViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.textLessonTitle)

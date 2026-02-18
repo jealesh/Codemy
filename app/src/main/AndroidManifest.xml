@@ -15,6 +15,7 @@
         android:theme="@style/Theme.Codemy">
         <activity android:name=".MainScreenActivity" />
         <activity android:name=".RegisterActivity" />
+        <activity android:name=".SandboxJsActivity" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">

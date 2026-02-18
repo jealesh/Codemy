@@ -12,13 +12,13 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.sql.insert
 import java.sql.Connection
-
-// Exposed только для /register
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.Users
 import tables.UserStats
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 // Модели
 @Serializable
@@ -48,16 +48,6 @@ data class LoginResponse(
     val userId: Long? = null
 )
 
-// ← Модель для ответа статистики (обязательно @Serializable)
-@Serializable
-data class UserStatsResponse(
-    val total_xp: Long,
-    val level: Int,
-    val weekly_xp: Int,
-    val last_reset_week: String? = null,
-    val updated_at: String? = null
-)
-
 @Serializable
 data class UserProfileResponse(
     val full_name: String = "",
@@ -67,6 +57,26 @@ data class UserProfileResponse(
     val weekly_xp: Int = 0,
     val last_reset_week: String? = null,
     val updated_at: String? = null
+)
+
+@Serializable
+data class CourseResponse(
+    val id: Long,
+    val name: String,
+    val description: String?,
+    val iconUrl: String?,
+    val isActive: Boolean
+)
+
+@Serializable
+data class LessonResponse(
+    val id: Long,
+    val title: String,
+    val orderIndex: Int,
+    val estimatedMinutes: Int,
+    val xpReward: Int,
+    val progress: Int?,
+    val completed: Boolean
 )
 
 fun main() {
@@ -116,7 +126,7 @@ fun Application.module() {
                     insertStatement[Users.id].value
                 }
 
-                // ← Автоматически создаём статистику для нового пользователя
+                // Автоматически создаём статистику для нового пользователя
                 transaction {
                     UserStats.insert {
                         it[userId] = newUserId
@@ -124,7 +134,7 @@ fun Application.module() {
                         it[level] = 1
                         it[weeklyXp] = 0
                         it[lastResetWeek] = null
-                        it[updatedAt] = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
+                        it[updatedAt] = OffsetDateTime.now(ZoneOffset.UTC)
                     }
                 }
 
@@ -144,18 +154,15 @@ fun Application.module() {
         post("/login") {
             try {
                 val request = call.receive<LoginRequest>()
-
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
                         SELECT id, password_hash 
                         FROM app.users 
-                        WHERE username = ? OR email = ?
+                        WHERE username = ? OR email = ? 
                         LIMIT 1
                     """.trimIndent())
-
                     stmt.setString(1, request.loginOrEmail)
                     stmt.setString(2, request.loginOrEmail)
-
                     val rs = stmt.executeQuery()
 
                     if (!rs.next()) {
@@ -190,33 +197,24 @@ fun Application.module() {
             }
         }
 
-        // ← Только один маршрут для статистики (JDBC)
         get("/user/profile/{userId}") {
-            val userId = call.parameters["userId"]?.toLongOrNull() ?: return@get call.respond(
-                HttpStatusCode.BadRequest,
-                mapOf("error" to "Неверный userId")
-            )
+            val userId = call.parameters["userId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Неверный userId"))
 
             try {
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                SELECT 
-                    u.full_name, u.username,
-                    us.total_xp, us.level, us.weekly_xp, us.last_reset_week, us.updated_at
-                FROM app.users u
-                LEFT JOIN app.user_stats us ON u.id = us.user_id
-                WHERE u.id = ?
-            """.trimIndent())
-
+                        SELECT u.full_name, u.username, us.total_xp, us.level, us.weekly_xp, 
+                               us.last_reset_week, us.updated_at 
+                        FROM app.users u 
+                        LEFT JOIN app.user_stats us ON u.id = us.user_id 
+                        WHERE u.id = ?
+                    """.trimIndent())
                     stmt.setLong(1, userId)
-
                     val rs = stmt.executeQuery()
 
                     if (!rs.next()) {
-                        call.respond(
-                            HttpStatusCode.NotFound,
-                            mapOf("error" to "Пользователь не найден")
-                        )
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "Пользователь не найден"))
                         return@get
                     }
 
@@ -230,7 +228,7 @@ fun Application.module() {
                         updated_at = rs.getTimestamp("updated_at")?.toString()
                     )
 
-                    call.respond(response)  // ← теперь объект data class
+                    call.respond(response)
                 }
             } catch (e: Exception) {
                 println("Profile error for user $userId: ${e.message}")
@@ -238,6 +236,93 @@ fun Application.module() {
                 call.respond(
                     HttpStatusCode.InternalServerError,
                     mapOf("error" to "Ошибка сервера: ${e.message}")
+                )
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        // Теперь без Exposed where/eq — чистый SQL
+        get("/courses") {
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    val stmt = conn.prepareStatement("""
+                        SELECT id, name, description, icon_url, is_active 
+                        FROM app.courses 
+                        WHERE is_active = true
+                        ORDER BY name
+                    """.trimIndent())
+
+                    val rs = stmt.executeQuery()
+                    val courses = mutableListOf<CourseResponse>()
+
+                    while (rs.next()) {
+                        courses.add(
+                            CourseResponse(
+                                id = rs.getLong("id"),
+                                name = rs.getString("name"),
+                                description = rs.getString("description"),
+                                iconUrl = rs.getString("icon_url"),
+                                isActive = rs.getBoolean("is_active")
+                            )
+                        )
+                    }
+
+                    call.respond(HttpStatusCode.OK, courses)
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to (e.message ?: "unknown error"))
+                )
+            }
+        }
+
+        get("/courses/{courseId}/lessons") {
+            val courseId = call.parameters["courseId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid courseId"))
+
+            val userId = call.request.queryParameters["userId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "userId required in query"))
+
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    val stmt = conn.prepareStatement("""
+                        SELECT l.id, l.title, l.order_index, l.estimated_minutes, l.xp_reward,
+                               ulp.progress, ulp.completed_at
+                        FROM app.lessons l
+                        LEFT JOIN app.user_lesson_progress ulp 
+                            ON l.id = ulp.lesson_id AND ulp.user_id = ?
+                        WHERE l.course_id = ?
+                        ORDER BY l.order_index ASC
+                    """.trimIndent())
+
+                    stmt.setLong(1, userId)
+                    stmt.setLong(2, courseId)
+
+                    val rs = stmt.executeQuery()
+                    val lessons = mutableListOf<LessonResponse>()
+
+                    while (rs.next()) {
+                        lessons.add(
+                            LessonResponse(
+                                id = rs.getLong("id"),
+                                title = rs.getString("title"),
+                                orderIndex = rs.getInt("order_index"),
+                                estimatedMinutes = rs.getInt("estimated_minutes"),
+                                xpReward = rs.getInt("xp_reward"),
+                                progress = if (rs.wasNull()) 0 else rs.getInt("progress"),
+                                completed = !rs.wasNull() && rs.getTimestamp("completed_at") != null
+                            )
+                        )
+                    }
+
+                    // Если нет записей прогресса — возвращаем уроки с progress=0
+                    call.respond(HttpStatusCode.OK, lessons)
+                }
+            } catch (e: Exception) {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf("error" to (e.message ?: "unknown"))
                 )
             }
         }

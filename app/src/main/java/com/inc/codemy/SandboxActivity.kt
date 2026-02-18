@@ -27,15 +27,31 @@ class SandboxActivity : AppCompatActivity() {
         outputResult = findViewById(R.id.outputResult)
 
         // Настройка Spinner
-        val languages = arrayOf("Python", "Java", "C#")
-        languageSpinner.adapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
+        val languages = arrayOf("Python", "JavaScript")
+        languageSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
 
         // Настройка WebView для Pyodide
         webViewPyodide.settings.javaScriptEnabled = true
         webViewPyodide.settings.domStorageEnabled = true
         webViewPyodide.loadUrl("file:///android_res/raw/pyodide_runner.html")
 
+        languageSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val lang = languages[position]
+
+                if (lang == "JavaScript") {
+                    startActivity(Intent(this@SandboxActivity, SandboxJsActivity::class.java))
+                    // НЕ добавляем finish() — чтобы можно было вернуться назад
+                    return
+                }
+
+                // Если Python — остаёмся здесь
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Кнопка "Выполнить" — только для Python (JS теперь в отдельной активности)
         btnRunCode.setOnClickListener {
             val code = inputCode.text.toString().trim()
             val lang = languageSpinner.selectedItem.toString()
@@ -53,15 +69,11 @@ class SandboxActivity : AppCompatActivity() {
 
             when (lang) {
                 "Python" -> runPython(code)
-                "Java", "C#" -> {
-                    outputResult.text =
-                        "$lang пока не поддерживается\n(скоро запустим через сервер)"
-                    outputResult.setTextColor(
-                        ContextCompat.getColor(
-                            this,
-                            android.R.color.holo_orange_light
-                        )
-                    )
+                "JavaScript" -> {
+                    // Эта ветка больше не нужна, т.к. переход происходит в спиннере
+                    // Но оставляем на всякий случай
+                    startActivity(Intent(this, SandboxJsActivity::class.java))
+                    finish()
                 }
             }
         }

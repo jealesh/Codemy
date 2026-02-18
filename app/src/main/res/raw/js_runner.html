@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>JS Sandbox</title>
+</head>
+<body>
+<script>
+    window.runJS = function(code) {
+        try {
+            // Перехватываем console.log и console.error
+            console.log = function(...args) {
+                AndroidConsole.log(args.map(a => String(a)).join(' '));
+            };
+
+            console.error = function(...args) {
+                AndroidConsole.log('ERROR: ' + args.map(a => String(a)).join(' '));
+            };
+
+            // Выполняем код пользователя
+            eval(code);
+        } catch (e) {
+            console.error(e.message);
+        }
+    };
+</script>
+</body>
+</html>

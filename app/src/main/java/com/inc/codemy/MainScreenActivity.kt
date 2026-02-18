@@ -11,8 +11,15 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.inc.codemy.models.CourseResponse
+import com.inc.codemy.models.LessonResponse
+import com.inc.codemy.network.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainScreenActivity : AppCompatActivity() {
 
@@ -23,31 +30,15 @@ class MainScreenActivity : AppCompatActivity() {
     private lateinit var progressDailyGoal: ProgressBar
     private lateinit var textDailyGoal: TextView
 
-    // Пример данных для разных курсов (пока захардкодим)
-    private val pythonLessons = listOf(
-        Lesson("Ввод и вывод данных", 100),
-        Lesson("Типы данных", 75),
-        Lesson("Условный оператор", 30),
-        Lesson("Циклы for и while", 0),
-        Lesson("Строки", 0),
-        Lesson("Списки", 0),
-        Lesson("Функции", 0)
-    )
-
-    private val kotlinLessons = listOf(
-        Lesson("Переменные и типы", 90),
-        Lesson("Условия и when", 60),
-        Lesson("Циклы", 20),
-        Lesson("Функции", 0),
-        Lesson("Классы и объекты", 0)
-    )
-
-    private var currentLessons = pythonLessons  // по умолчанию Python
+    private var dynamicCourses: List<CourseResponse> = emptyList()
+    private var selectedCourseId: Long = -1L
+    private val userId: Long = 1L // TODO: брать из SharedPreferences после логина
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_screen)
 
+        // Инициализация View
         courseSpinner = findViewById(R.id.courseSpinner)
         textSectionTitle = findViewById(R.id.textSectionTitle)
         lessonsRecycler = findViewById(R.id.lessonsRecycler)
@@ -55,62 +46,31 @@ class MainScreenActivity : AppCompatActivity() {
         progressDailyGoal = findViewById(R.id.progressDailyGoal)
         textDailyGoal = findViewById(R.id.textDailyGoal)
 
-        // Настройка Spinner
-        val courses = arrayOf("Python", "Java", "C#")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, courses)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        courseSpinner.adapter = adapter
-
-        // По умолчанию выбираем Python (позиция 0)
-        courseSpinner.setSelection(0)
-
-        // Обработчик выбора курса
-        courseSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedCourse = courses[position]
-                textSectionTitle.text = "Обучение · $selectedCourse"
-
-                // Меняем список уроков в зависимости от выбора
-                currentLessons = when (selectedCourse) {
-                    "Python" -> pythonLessons
-                    "Kotlin" -> kotlinLessons
-                    else -> pythonLessons  // для остальных пока Python
-                }
-
-                // Обновляем RecyclerView
-                (lessonsRecycler.adapter as? LessonsAdapter)?.let { adapter ->
-                    adapter.updateLessons(currentLessons)  // нужно будет добавить метод в адаптер
-                } ?: run {
-                    lessonsRecycler.adapter = LessonsAdapter(currentLessons)
-                }
-
-                Toast.makeText(this@MainScreenActivity, "Выбран курс: $selectedCourse", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // ничего не делаем
-            }
-        }
-
         // Настройка RecyclerView
         lessonsRecycler.layoutManager = LinearLayoutManager(this)
         lessonsRecycler.setHasFixedSize(true)
-        lessonsRecycler.adapter = LessonsAdapter(currentLessons)
+        lessonsRecycler.adapter = LessonsAdapter(emptyList())
 
-        // Кнопка "Начать тренировку" → последний доступный урок текущего курса
+        // Загрузка курсов из API
+        loadCoursesFromApi()
+
+        // Кнопка "Начать тренировку" — открывает следующий урок
         btnStartTraining.setOnClickListener {
-            val nextIndex = findNextAvailableLessonIndex(currentLessons)
+            val adapter = lessonsRecycler.adapter as? LessonsAdapter
+            val lessons = adapter?.currentLessons ?: emptyList()   // ← исправлено: currentLessons вместо lessons
+            val nextIndex = findNextAvailableLessonIndex(lessons)
+
             if (nextIndex >= 0) {
                 val intent = Intent(this, PythonCourseActivity::class.java)
                 intent.putExtra("START_LESSON_INDEX", nextIndex)
-                intent.putExtra("SELECTED_COURSE", courseSpinner.selectedItem.toString())
+                intent.putExtra("SELECTED_COURSE", courseSpinner.selectedItem?.toString() ?: "Курс")
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "Все уроки завершены!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Навигация (без изменений)
+        // Нижняя навигация
         findViewById<TextView>(R.id.navProfile).setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
             finish()
@@ -126,9 +86,87 @@ class MainScreenActivity : AppCompatActivity() {
             finish()
         }
 
-        // Ежедневный прогресс (захардкод)
+        // Временный захардкод ежедневной цели (потом из API / БД)
         progressDailyGoal.progress = 45
         textDailyGoal.text = "Цель дня: 9 / 20 XP"
+    }
+
+    private fun loadCoursesFromApi() {
+        lifecycleScope.launch {
+            try {
+                val fetchedCourses = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.getCourses()
+                }
+
+                dynamicCourses = fetchedCourses
+
+                if (dynamicCourses.isEmpty()) {
+                    Toast.makeText(this@MainScreenActivity, "Нет доступных курсов", Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+
+                val courseNames = dynamicCourses.map { it.name }
+                val adapter = ArrayAdapter(
+                    this@MainScreenActivity,
+                    android.R.layout.simple_spinner_item,
+                    courseNames
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                courseSpinner.adapter = adapter
+
+                // Выбираем первый курс по умолчанию
+                courseSpinner.setSelection(0)
+                selectedCourseId = dynamicCourses[0].id
+                textSectionTitle.text = "Обучение · ${dynamicCourses[0].name}"
+                loadLessonsForCourse(selectedCourseId)
+
+                // Обработчик смены курса
+                courseSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                        if (position >= dynamicCourses.size) return
+                        val selectedCourse = dynamicCourses[position]
+                        selectedCourseId = selectedCourse.id
+                        textSectionTitle.text = "Обучение · ${selectedCourse.name}"
+                        loadLessonsForCourse(selectedCourseId)
+                    }
+
+                    override fun onNothingSelected(parent: AdapterView<*>) {}
+                }
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MainScreenActivity,
+                    "Ошибка загрузки курсов: ${e.localizedMessage ?: "Неизвестная ошибка"}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun loadLessonsForCourse(courseId: Long) {
+        lifecycleScope.launch {
+            try {
+                val lessonsResponse = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.getLessons(courseId, userId)
+                }
+
+                val lessonsForAdapter = lessonsResponse.map { response ->
+                    Lesson(
+                        title = response.title,
+                        progress = response.progress ?: 0
+                    )
+                }
+
+                (lessonsRecycler.adapter as LessonsAdapter).updateLessons(lessonsForAdapter)
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MainScreenActivity,
+                    "Ошибка загрузки уроков: ${e.localizedMessage ?: "Неизвестная ошибка"}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun findNextAvailableLessonIndex(lessons: List<Lesson>): Int {
