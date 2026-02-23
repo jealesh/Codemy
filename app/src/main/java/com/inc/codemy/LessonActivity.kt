@@ -5,8 +5,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.inc.codemy.models.LessonResponse
 import com.inc.codemy.network.ApiClient
 import kotlinx.coroutines.Dispatchers
@@ -15,27 +16,24 @@ import kotlinx.coroutines.withContext
 
 class LessonActivity : AppCompatActivity() {
 
-    private lateinit var recycler: RecyclerView
-    private lateinit var tvTitle: TextView
+    private lateinit var viewPager: ViewPager2
+    private lateinit var tabLayout: TabLayout
     private var lessonId: Long = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lesson)
 
-        recycler = findViewById(R.id.recyclerSections)
-        tvTitle = findViewById(R.id.tvLessonTitle)
-
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = LessonSectionsAdapter(emptyList())
+        viewPager = findViewById(R.id.viewPager)
+        tabLayout = findViewById(R.id.tabLayout)
 
         lessonId = intent.getLongExtra("LESSON_ID", -1L)
-        val title = intent.getStringExtra("LESSON_TITLE") ?: "Урок без названия"
+        val title = intent.getStringExtra("LESSON_TITLE") ?: "Урок"
 
-        tvTitle.text = title
+        findViewById<TextView>(R.id.tvLessonTitle)?.text = title
 
         if (lessonId == -1L) {
-            Toast.makeText(this, "Урок не найден (ID = -1)", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Урок не найден", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -47,22 +45,24 @@ class LessonActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val lesson = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.getLessonContent(lessonId, 1L) // userId = 1 пока
+                    ApiClient.apiService.getLessonContent(lessonId, 1L) // userId = 1
                 }
 
                 val count = lesson.content.size
                 Toast.makeText(this@LessonActivity, "Загружено карточек: $count", Toast.LENGTH_LONG).show()
 
-                tvTitle.text = "${lesson.title} ($count карточек)"
+                findViewById<TextView>(R.id.tvLessonTitle)?.text = "${lesson.title} ($count карточек)"
 
-                (recycler.adapter as LessonSectionsAdapter).update(lesson.content)
+                // Настраиваем ViewPager
+                viewPager.adapter = LessonSectionsPagerAdapter(this@LessonActivity, lesson.content)
 
-                if (count == 0) {
-                    Toast.makeText(this@LessonActivity, "В уроке пока нет заданий", Toast.LENGTH_LONG).show()
-                }
+                // Связываем TabLayout с ViewPager (точки или номера внизу)
+                TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                    tab.text = (position + 1).toString() // можно заменить на иконки или "Теория 1"
+                }.attach()
 
             } catch (e: Exception) {
-                Toast.makeText(this@LessonActivity, "Ошибка загрузки урока: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@LessonActivity, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
