@@ -1,5 +1,6 @@
 package com.inc.codemy
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,13 @@ class LessonsAdapter(
         val lesson = lessons[position]
         holder.title.text = lesson.title
         holder.progress.text = "${lesson.progress}%"
+
+        holder.itemView.setOnClickListener {
+            val intent = Intent(holder.itemView.context, LessonActivity::class.java)
+            intent.putExtra("LESSON_ID", lesson.id)
+            intent.putExtra("LESSON_TITLE", lesson.title)
+            holder.itemView.context.startActivity(intent)
+        }
     }
     fun updateLessons(newLessons: List<Lesson>) {
         // Простой способ — если список сильно меняется

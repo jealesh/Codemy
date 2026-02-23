@@ -17,6 +17,9 @@
         <activity android:name=".RegisterActivity" />
         <activity android:name=".SandboxJsActivity" />
         <activity
+            android:name=".LessonActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
@@ -27,7 +30,6 @@
         <activity android:name=".ProfileActivity" />
         <activity android:name=".SandboxActivity" />
         <activity android:name=".LeagueActivity" />
-        <activity android:name=".PythonCourseActivity" />
 
     </application>
 

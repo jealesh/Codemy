@@ -20,6 +20,7 @@ import com.inc.codemy.network.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.Long
 
 class MainScreenActivity : AppCompatActivity() {
 
@@ -57,13 +58,15 @@ class MainScreenActivity : AppCompatActivity() {
         // Кнопка "Начать тренировку" — открывает следующий урок
         btnStartTraining.setOnClickListener {
             val adapter = lessonsRecycler.adapter as? LessonsAdapter
-            val lessons = adapter?.currentLessons ?: emptyList()   // ← исправлено: currentLessons вместо lessons
-            val nextIndex = findNextAvailableLessonIndex(lessons)
+            val lessons = adapter?.currentLessons ?: emptyList()  // или adapter?.lessons, если нет currentLessons
 
+            val nextIndex = findNextAvailableLessonIndex(lessons)
             if (nextIndex >= 0) {
-                val intent = Intent(this, PythonCourseActivity::class.java)
-                intent.putExtra("START_LESSON_INDEX", nextIndex)
-                intent.putExtra("SELECTED_COURSE", courseSpinner.selectedItem?.toString() ?: "Курс")
+                val nextLesson = lessons[nextIndex]
+
+                val intent = Intent(this, LessonActivity::class.java)
+                intent.putExtra("LESSON_ID", nextLesson.id)
+                intent.putExtra("LESSON_TITLE", nextLesson.title)
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "Все уроки завершены!", Toast.LENGTH_SHORT).show()
@@ -152,6 +155,7 @@ class MainScreenActivity : AppCompatActivity() {
 
                 val lessonsForAdapter = lessonsResponse.map { response ->
                     Lesson(
+                        id = response.id,
                         title = response.title,
                         progress = response.progress ?: 0
                     )

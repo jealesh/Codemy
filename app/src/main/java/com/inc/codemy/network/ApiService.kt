@@ -32,4 +32,10 @@ interface ApiService {
         @Path("courseId") courseId: Long,
         @Query("userId") userId: Long
     ): List<LessonResponse>
+
+    @GET("lessons/{lessonId}/content")
+    suspend fun getLessonContent(
+        @Path("lessonId") lessonId: Long,
+        @Query("userId") userId: Long
+    ): LessonResponse
 }

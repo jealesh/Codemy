@@ -10,5 +10,6 @@ data class LessonResponse(
     val estimatedMinutes: Int,
     val xpReward: Int,
     val progress: Int? = 0,  // Прогресс пользователя (0-100)
-    val completed: Boolean = false
+    val completed: Boolean = false,
+    val content: List<LessonSection> = emptyList()
 )

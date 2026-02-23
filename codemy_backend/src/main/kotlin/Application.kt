@@ -76,7 +76,16 @@ data class LessonResponse(
     val estimatedMinutes: Int,
     val xpReward: Int,
     val progress: Int?,
-    val completed: Boolean
+    val completed: Boolean,
+    val content: List<LessonSection> = emptyList()
+)
+
+@Serializable
+data class LessonSection(
+    val type: String,           // "theory", "oral_code", "programming", "matching"
+    val text: String,           // основной текст / вопрос
+    val correctAnswer: String? = null,  // правильный ответ (для задач)
+    val options: List<String>? = null   // варианты для matching
 )
 
 fun main() {
@@ -324,6 +333,76 @@ fun Application.module() {
                     HttpStatusCode.InternalServerError,
                     mapOf("error" to (e.message ?: "unknown"))
                 )
+            }
+        }
+        get("/lessons/{lessonId}/content") {
+            val lessonId = call.parameters["lessonId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid lessonId"))
+
+            val userId = call.request.queryParameters["userId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "userId required"))
+
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    // Урок
+                    val lessonStmt = conn.prepareStatement("""
+                SELECT l.id, l.title, l.order_index, l.estimated_minutes, l.xp_reward,
+                       ulp.progress, (ulp.completed_at IS NOT NULL) AS completed
+                FROM app.lessons l
+                LEFT JOIN app.user_lesson_progress ulp ON l.id = ulp.lesson_id AND ulp.user_id = ?
+                WHERE l.id = ?
+            """.trimIndent())
+
+                    lessonStmt.setLong(1, userId)
+                    lessonStmt.setLong(2, lessonId)
+
+                    val lessonRs = lessonStmt.executeQuery()
+                    if (!lessonRs.next()) {
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "Урок не найден"))
+                        return@use
+                    }
+
+                    // Упражнения
+                    val exerciseStmt = conn.prepareStatement("""
+                SELECT "order", type, text, correct_answer, options
+                FROM app.exercise
+                WHERE lesson_id = ?
+                ORDER BY "order" ASC
+            """.trimIndent())
+
+                    exerciseStmt.setLong(1, lessonId)
+                    val exerciseRs = exerciseStmt.executeQuery()
+
+                    val content = mutableListOf<LessonSection>()
+                    while (exerciseRs.next()) {
+                        content.add(
+                            LessonSection(
+                                type = exerciseRs.getString("type"),
+                                text = exerciseRs.getString("text"),
+                                correctAnswer = exerciseRs.getString("correct_answer"),
+                                options = if (exerciseRs.getString("options") != null) {
+                                    Json.decodeFromString(exerciseRs.getString("options"))
+                                } else null
+                            )
+                        )
+                    }
+
+                    val lesson = LessonResponse(
+                        id = lessonRs.getLong("id"),
+                        title = lessonRs.getString("title"),
+                        orderIndex = lessonRs.getInt("order_index"),
+                        estimatedMinutes = lessonRs.getInt("estimated_minutes"),
+                        xpReward = lessonRs.getInt("xp_reward"),
+                        progress = if (lessonRs.wasNull()) 0 else lessonRs.getInt("progress"),
+                        completed = lessonRs.getBoolean("completed"),
+                        content = content
+                    )
+
+                    call.respond(HttpStatusCode.OK, lesson)
+                }
+            } catch (e: Exception) {
+                println("Ошибка в /lessons/$lessonId/content: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
     }
