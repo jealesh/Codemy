@@ -2,27 +2,70 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:background="@drawable/bg_lesson_card"
-    android:padding="16dp"
-    android:layout_marginBottom="12dp">
+    android:padding="20dp"
+    android:layout_marginBottom="12dp"
+    android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/textLessonTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ввод и вывод данных"
-        android:textSize="18sp"
-        android:textColor="@color/colorTextPrimary"
-        android:fontFamily="@font/nunitosans" />
+    <!-- Иконка урока -->
+    <LinearLayout
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/bg_lesson_icon"
+        android:gravity="center"
+        android:layout_marginEnd="16dp">
 
-    <TextView
-        android:id="@+id/textLessonProgress"
-        android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📚"
+            android:textSize="28sp" />
+    </LinearLayout>
+
+    <!-- Информация об уроке -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="0%"
-        android:textSize="14sp"
-        android:textColor="@color/colorSecondary"
-        android:layout_marginTop="4dp" />
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textLessonTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ввод и вывод данных"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorTextPrimary" />
+
+        <TextView
+            android:id="@+id/textLessonProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0%"
+            android:textSize="14sp"
+            android:fontFamily="@font/rubik"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- Индикатор выполнения -->
+    <LinearLayout
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_progress_circle"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/textLessonCheck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✓"
+            android:textSize="20sp"
+            android:textColor="@color/colorBackground"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </LinearLayout>

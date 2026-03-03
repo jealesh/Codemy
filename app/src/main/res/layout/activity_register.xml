@@ -4,123 +4,192 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorBackground"
-    android:padding="32dp"
+    android:fillViewport="true"
     tools:context=".RegisterActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center"
+        android:padding="32dp">
 
-        <TextView
-            android:id="@+id/textTitle"
+        <!-- Заголовок -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Регистрация"
-            android:textColor="@color/colorAccent"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/nunitosans"
-            android:layout_marginBottom="32dp" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
 
-        <EditText
-            android:id="@+id/inputName"
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Создать аккаунт"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/nunitosans"
+                android:textColor="@color/colorAccent"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Начни обучение бесплатно"
+                android:textSize="14sp"
+                android:fontFamily="@font/rubik"
+                android:textColor="#80FFFFFF" />
+        </LinearLayout>
+
+        <!-- Поле: Имя -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Имя"
-            android:inputType="textPersonName"
-            android:backgroundTint="@color/colorSecondary"
-            android:textColorHint="@color/colorAccent"
-            android:textColor="@color/colorTextPrimary"
-            android:padding="12dp"
-            android:fontFamily="@font/rubik"
-            android:layout_marginBottom="16dp" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-        <EditText
-            android:id="@+id/inputLogin"
+            <EditText
+                android:id="@+id/inputName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Имя"
+                android:inputType="textPersonName"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#80FFFFFF"
+                android:fontFamily="@font/rubik"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
+        </LinearLayout>
+
+        <!-- Поле: Логин -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Логин"
-            android:inputType="text"
-            android:backgroundTint="@color/colorSecondary"
-            android:textColorHint="@color/colorAccent"
-            android:textColor="@color/colorTextPrimary"
-            android:padding="12dp"
-            android:fontFamily="@font/rubik"
-            android:layout_marginBottom="16dp" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
+            <EditText
+                android:id="@+id/inputLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Логин"
+                android:inputType="text"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#80FFFFFF"
+                android:fontFamily="@font/rubik"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
+        </LinearLayout>
 
-        <EditText
-            android:id="@+id/inputAge"
+        <!-- Поле: Возраст -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Возраст"
-            android:inputType="number"
-            android:backgroundTint="@color/colorSecondary"
-            android:textColorHint="@color/colorAccent"
-            android:textColor="@color/colorTextPrimary"
-            android:padding="12dp"
-            android:fontFamily="@font/rubik"
-            android:layout_marginBottom="16dp" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-        <EditText
-            android:id="@+id/inputEmail"
+            <EditText
+                android:id="@+id/inputAge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Возраст"
+                android:inputType="number"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#80FFFFFF"
+                android:fontFamily="@font/rubik"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
+        </LinearLayout>
+
+        <!-- Поле: Email -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:backgroundTint="@color/colorSecondary"
-            android:textColorHint="@color/colorAccent"
-            android:textColor="@color/colorTextPrimary"
-            android:padding="12dp"
-            android:fontFamily="@font/rubik"
-            android:layout_marginBottom="16dp" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-        <EditText
-            android:id="@+id/inputPassword"
+            <EditText
+                android:id="@+id/inputEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#80FFFFFF"
+                android:fontFamily="@font/rubik"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
+        </LinearLayout>
+
+        <!-- Поле: Пароль -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Пароль"
-            android:inputType="textPassword"
-            android:backgroundTint="@color/colorSecondary"
-            android:textColorHint="@color/colorAccent"
-            android:textColor="@color/colorTextPrimary"
-            android:padding="12dp"
-            android:fontFamily="@font/rubik"
-            android:layout_marginBottom="24dp" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_input_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
+            <EditText
+                android:id="@+id/inputPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Пароль"
+                android:inputType="textPassword"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#80FFFFFF"
+                android:fontFamily="@font/rubik"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:padding="0dp" />
+        </LinearLayout>
+
+        <!-- Кнопка: Зарегистрироваться -->
         <Button
             android:id="@+id/btnRegister"
+            style="@style/CodemyButton.Primary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:text="Зарегистрироваться"
-            android:textColor="@color/colorBackground"
-            android:backgroundTint="@color/colorAccent"
-            android:textStyle="bold"
-            android:padding="12dp"
-            android:fontFamily="@font/nunitosans" />
+            android:layout_marginBottom="16dp" />
 
+        <!-- Кнопка: Уже зарегистрированы -->
         <Button
             android:id="@+id/btnLoginBack"
+            style="@style/CodemyButton.Secondary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Уже зарегистрированы?"
-            android:textColor="@color/colorAccent"
-            android:backgroundTint="@android:color/transparent"
-            android:textStyle="bold"
-            android:padding="12dp"
-            android:fontFamily="@font/nunitosans"
-            android:layout_marginTop="16dp" />
+            android:layout_height="56dp"
+            android:text="Уже зарегистрированы? Войти" />
 
+        <!-- Сообщение -->
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text=""
-            android:textSize="16sp"
-            android:textAlignment="center"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp" />
+            android:textSize="14sp"
+            android:fontFamily="@font/rubik"
+            android:textColor="@color/colorTextPrimary"
+            android:gravity="center"
+            android:layout_marginTop="24dp" />
+
     </LinearLayout>
 </ScrollView>

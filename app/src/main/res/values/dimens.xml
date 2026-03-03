@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ════════════════════════════════════════════════════════════
+         SPACING - PADDING & MARGINS
+         ════════════════════════════════════════════════════════════ -->
+    
+    <!-- Extra Small -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_xs_half">6dp</dimen>
+    
+    <!-- Small -->
+    <dimen name="spacing_s">8dp</dimen>
+    <dimen name="spacing_s_half">12dp</dimen>
+    
+    <!-- Medium -->
+    <dimen name="spacing_m">16dp</dimen>
+    <dimen name="spacing_m_half">20dp</dimen>
+    
+    <!-- Large -->
+    <dimen name="spacing_l">24dp</dimen>
+    <dimen name="spacing_l_half">28dp</dimen>
+    
+    <!-- Extra Large -->
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxl">40dp</dimen>
+
+    <!-- ════════════════════════════════════════════════════════════
+         TEXT SIZES
+         ════════════════════════════════════════════════════════════ -->
+    
+    <dimen name="text_size_caption">12sp</dimen>
+    <dimen name="text_size_body_secondary">14sp</dimen>
+    <dimen name="text_size_body">16sp</dimen>
+    <dimen name="text_size_heading_small">18sp</dimen>
+    <dimen name="text_size_heading_medium">20sp</dimen>
+    <dimen name="text_size_heading_large">22sp</dimen>
+    <dimen name="text_size_heading_xl">24sp</dimen>
+    <dimen name="text_size_heading_xxl">28sp</dimen>
+
+    <!-- ════════════════════════════════════════════════════════════
+         COMPONENT SIZES
+         ════════════════════════════════════════════════════════════ -->
+    
+    <!-- Buttons -->
+    <dimen name="button_height">52dp</dimen>
+    <dimen name="button_height_small">44dp</dimen>
+    <dimen name="button_corner_radius">12dp</dimen>
+    <dimen name="button_corner_radius_small">10dp</dimen>
+    <dimen name="button_padding_vertical">14dp</dimen>
+    <dimen name="button_padding_horizontal">24dp</dimen>
+
+    <!-- Input Fields -->
+    <dimen name="input_height">52dp</dimen>
+    <dimen name="input_padding">14dp</dimen>
+    <dimen name="input_corner_radius">10dp</dimen>
+
+    <!-- Cards -->
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_margin_bottom">12dp</dimen>
+
+    <!-- Bottom Navigation -->
+    <dimen name="bottom_nav_height">60dp</dimen>
+    <dimen name="bottom_nav_icon_size">26sp</dimen>
+    <dimen name="bottom_nav_elevation">8dp</dimen>
+
+    <!-- Avatar -->
+    <dimen name="avatar_size_small">40dp</dimen>
+    <dimen name="avatar_size_medium">56dp</dimen>
+    <dimen name="avatar_size_large">80dp</dimen>
+
+    <!-- Divider -->
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="divider_inset">16dp</dimen>
+
+</resources>

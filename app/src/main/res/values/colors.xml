@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ════════════════════════════════════════════════════════════
+         PRIMARY COLORS
+         ════════════════════════════════════════════════════════════ -->
     <color name="colorBackground">#242834</color>
+    <color name="colorBackgroundLight">#2D3240</color>
+    <color name="colorSurface">#1E222E</color>
+    
+    <!-- Accent Colors -->
     <color name="colorAccent">#B6FF00</color>
+    <color name="colorAccentDark">#9CE600</color>
     <color name="colorSecondary">#7D53FF</color>
+    <color name="colorSecondaryDark">#6A42E6</color>
+    
+    <!-- Text Colors -->
     <color name="colorTextPrimary">#FFFFFF</color>
+    <color name="colorTextSecondary">#B3FFFFFF</color>
+    <color name="colorTextTertiary">#80FFFFFF</color>
+    <color name="colorTextDisabled">#4DFFFFFF</color>
+    
+    <!-- Status Colors -->
+    <color name="colorSuccess">#4CAF50</color>
+    <color name="colorError">#FF5555</color>
+    <color name="colorWarning">#FF9800</color>
+    <color name="colorInfo">#2196F3</color>
+    
+    <!-- Divider -->
+    <color name="colorDivider">#33FFFFFF</color>
 </resources>

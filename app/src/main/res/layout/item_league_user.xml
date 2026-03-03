@@ -1,32 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:background="@drawable/bg_league_item"
+    android:padding="16dp"
     android:gravity="center_vertical"
-    android:padding="12dp"
-    android:layout_marginBottom="6dp"
-    android:clipToPadding="false"
     android:elevation="2dp">
 
-    <!-- Место (ранг) -->
-    <TextView
-        android:id="@+id/userRank"
-        android:layout_width="32dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorAccent"
-        android:textSize="18sp"
-        android:fontFamily="@font/nunitosans"
-        android:gravity="center" />
+    <!-- Ранг -->
+    <LinearLayout
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_rank_badge"
+        android:gravity="center"
+        android:layout_marginEnd="16dp">
+
+        <TextView
+            android:id="@+id/userRank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorBackground" />
+    </LinearLayout>
 
     <!-- Аватар -->
     <ImageView
         android:id="@+id/userAvatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/ic_avatar_placeholder"
-        android:layout_marginEnd="12dp" />
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_avatar_circle" />
 
-    <!-- Имя и XP -->
+    <!-- Информация -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,17 +47,29 @@
             android:id="@+id/userName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorTextPrimary"
+            android:text="Имя пользователя"
             android:textSize="16sp"
-            android:fontFamily="@font/rubik"/>
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorTextPrimary" />
 
         <TextView
             android:id="@+id/userXPWeekly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/colorSecondary"
+            android:text="1500 XP за 7 дней"
             android:textSize="14sp"
-            android:text="XP за 7 дней"
-            android:fontFamily="@font/rubik"/>
+            android:fontFamily="@font/rubik"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
+
+    <!-- Медаль для топ-3 -->
+    <TextView
+        android:id="@+id/userMedal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:visibility="gone" />
+
 </LinearLayout>

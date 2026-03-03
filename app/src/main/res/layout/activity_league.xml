@@ -2,97 +2,58 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:padding="20dp">
+    android:background="@color/colorBackground">
 
-    <!-- Осталось времени -->
-    <TextView
-        android:id="@+id/textDaysLeft"
-        android:layout_width="wrap_content"
+    <!-- Заголовок -->
+    <LinearLayout
+        android:id="@+id/headerPanel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2 дня до завершения"
-        android:textSize="14sp"
-        android:fontFamily="@font/rubik"
-        android:textColor="@color/colorSecondary"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="@drawable/bg_header_gradient"
+        android:gravity="center"
+        android:layout_alignParentTop="true">
 
-    <!-- Название лиги -->
-    <TextView
-        android:id="@+id/textLeagueName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Обсидиановая лига"
-        android:textSize="22sp"
-        android:fontFamily="@font/nunitosans"
-        android:textColor="@color/colorTextPrimary"
-        android:layout_below="@id/textDaysLeft"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        <TextView
+            android:id="@+id/textLeagueName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🏆 Еженедельный рейтинг"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorTextPrimary" />
+
+        <TextView
+            android:id="@+id/textDaysLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 дня до завершения недели"
+            android:textSize="14sp"
+            android:fontFamily="@font/rubik"
+            android:textColor="@color/colorAccent"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
 
     <!-- Список участников -->
     <ListView
         android:id="@+id/leagueListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/textLeagueName"
+        android:layout_below="@id/headerPanel"
         android:layout_above="@id/bottomNav"
         android:divider="@null"
         android:dividerHeight="8dp"
         android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
         android:paddingBottom="16dp" />
 
-    <!-- Нижнее меню -->
-    <LinearLayout
+    <!-- Нижняя навигация -->
+    <include
         android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="10dp"
-        android:layout_alignParentBottom="true">
-
-        <TextView
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏠"
-            android:textSize="26sp"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navSandbox"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="⌨️"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navTrophy"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏆"
-            android:textSize="26sp"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="👤"
-            android:textSize="26sp"
-            android:textColor="@color/colorTextPrimary" />
-
-    </LinearLayout>
+        layout="@layout/include_bottom_navigation" />
 
 </RelativeLayout>

@@ -56,14 +56,29 @@ class LessonActivity : AppCompatActivity() {
                 // Настраиваем ViewPager
                 viewPager.adapter = LessonSectionsPagerAdapter(this@LessonActivity, lesson.content)
 
-                // Связываем TabLayout с ViewPager (точки или номера внизу)
+                // Связываем TabLayout с ViewPager (номера карточек)
                 TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                    tab.text = (position + 1).toString() // можно заменить на иконки или "Теория 1"
+                    tab.text = "${position + 1}"
                 }.attach()
 
             } catch (e: Exception) {
                 Toast.makeText(this@LessonActivity, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    /**
+     * Переход на следующую карточку
+     */
+    fun goToNextCard() {
+        val currentItem = viewPager.currentItem
+        val adapter = viewPager.adapter
+        if (adapter != null && currentItem < adapter.itemCount - 1) {
+            viewPager.setCurrentItem(currentItem + 1, true)
+        } else {
+            // Это последняя карточка - завершаем урок
+            Toast.makeText(this, "Урок завершён!", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 }

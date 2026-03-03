@@ -2,196 +2,256 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:padding="20dp">
+    android:background="@color/colorBackground">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/bottomNav"
         android:layout_alignParentTop="true"
-        android:padding="24dp">
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal"
+            android:padding="24dp">
 
-            <!-- Аватар -->
-            <ImageView
-                android:id="@+id/profileAvatar"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@drawable/ic_avatar_placeholder"
-                android:layout_marginTop="16dp" />
-
-            <!-- Имя пользователя -->
-            <TextView
-                android:id="@+id/profileName"
-                android:layout_width="wrap_content"
+            <!-- Профиль карточка -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Имя Пользователя"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/nunitosans" />
+                android:orientation="vertical"
+                android:background="@drawable/bg_profile_card_transparent"
+                android:padding="24dp"
+                android:gravity="center"
+                android:layout_marginBottom="20dp">
 
-            <!-- Логин -->
-            <TextView
-                android:id="@+id/profileLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="username"
-                android:textColor="@color/colorAccent"
-                android:textSize="14sp"
-                android:layout_marginBottom="24dp"
-                android:fontFamily="@font/rubik" />
+                <!-- Аватар -->
+                <FrameLayout
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginBottom="16dp">
 
-            <TextView
-                android:id="@+id/profileAchievementTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Достижения пользователя:"
-                android:textColor="@color/colorSecondary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="12dp" />
+                    <View
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:background="@drawable/bg_avatar_border_transparent" />
 
-            <!-- Блок статистики -->
+                    <ImageView
+                        android:id="@+id/profileAvatar"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_avatar_placeholder"
+                        android:scaleType="centerCrop" />
+                </FrameLayout>
+
+                <!-- Имя пользователя -->
+                <TextView
+                    android:id="@+id/profileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Имя Пользователя"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/nunitosans"
+                    android:textColor="@color/colorTextPrimary" />
+
+                <!-- Логин -->
+                <TextView
+                    android:id="@+id/profileLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="username"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/rubik"
+                    android:textColor="@color/colorAccent"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <!-- Статистика - растянуты равномерно -->
             <LinearLayout
                 android:id="@+id/statsBlock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="36dp">
+                android:layout_marginBottom="20dp">
 
-                <TextView
-                    android:id="@+id/profileStreak"
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_stat_card_transparent"
+                    android:padding="16dp"
                     android:gravity="center"
-                    android:text="🔥 0 дней"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/rubik" />
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="120dp">
 
-                <TextView
-                    android:id="@+id/profileXP"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="⚡ 0 XP"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/rubik" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔥"
+                        android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
 
-                <TextView
-                    android:id="@+id/profileMaxStreak"
+                    <TextView
+                        android:id="@+id/profileStreak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 дней"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/nunitosans"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Стрик"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/rubik"
+                        android:textColor="#80FFFFFF"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_stat_card_transparent"
+                    android:padding="16dp"
                     android:gravity="center"
-                    android:text="🏆 Лучший"
-                    android:textColor="@color/colorTextPrimary"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/rubik" />
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="120dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡"
+                        android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/profileXP"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 XP"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/nunitosans"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Опыт"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/rubik"
+                        android:textColor="#80FFFFFF"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_stat_card_transparent"
+                    android:padding="16dp"
+                    android:gravity="center"
+                    android:minHeight="120dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🏆"
+                        android:textSize="28sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/profileMaxStreak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/nunitosans"
+                        android:textColor="@color/colorTextPrimary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Рекорд"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/rubik"
+                        android:textColor="#80FFFFFF"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Сертификаты -->
+            <!-- Достижения -->
             <TextView
-                android:id="@+id/profileCertificatesTitle"
-                android:layout_width="wrap_content"
+                android:id="@+id/profileAchievementTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Сертификаты:"
-                android:textColor="@color/colorSecondary"
+                android:text="🏅 Достижения"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:fontFamily="@font/nunitosans"
+                android:textColor="@color/colorTextPrimary"
                 android:layout_marginBottom="12dp" />
 
             <LinearLayout
                 android:id="@+id/certificatesContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@drawable/bg_lesson_card"
+                android:padding="20dp"
+                android:layout_marginBottom="20dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Пока сертификатов нет"
-                    android:textColor="@color/colorTextPrimary"
+                    android:text="Пока нет достижений"
                     android:textSize="14sp"
-                    android:layout_marginBottom="20dp" />
+                    android:fontFamily="@font/rubik"
+                    android:textColor="#80FFFFFF"
+                    android:gravity="center"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Проходите уроки и получайте награды!"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/rubik"
+                    android:textColor="#60FFFFFF"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="4dp" />
             </LinearLayout>
 
-            <!-- Выйти -->
+            <!-- Кнопка: Выйти -->
             <Button
                 android:id="@+id/btnLogout"
+                style="@style/CodemyButton.Secondary"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Выйти"
-                android:textColor="@color/colorBackground"
-                android:backgroundTint="@color/colorAccent"
-                android:textStyle="bold"
-                android:padding="12dp"
-                android:fontFamily="@font/nunitosans"/>
+                android:layout_height="56dp"
+                android:layout_marginBottom="20dp"
+                android:text="🚪 Выйти из аккаунта"
+                android:gravity="center" />
+
         </LinearLayout>
     </ScrollView>
 
     <!-- Нижнее меню -->
-    <LinearLayout
+    <include
         android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="10dp"
-        android:layout_alignParentBottom="true">
-
-        <TextView
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏠"
-            android:textSize="26sp"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navSandbox"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="⌨️"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navTrophy"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏆"
-            android:textSize="26sp"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="👤"
-            android:textSize="26sp"
-            android:textColor="@color/colorAccent" />
-    </LinearLayout>
+        layout="@layout/include_bottom_navigation" />
 
 </RelativeLayout>

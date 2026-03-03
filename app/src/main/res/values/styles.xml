@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ════════════════════════════════════════════════════════════
+         BUTTON STYLES
+         ════════════════════════════════════════════════════════════ -->
+
+    <!-- Базовый стиль кнопки -->
+    <style name="CodemyButton" />
+
+    <style name="CodemyButton.Primary">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorBackground</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/nunitosans</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:background">@drawable/bg_codemy_button_primary</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <style name="CodemyButton.Secondary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/nunitosans</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">24dp</item>
+        <item name="android:paddingEnd">24dp</item>
+        <item name="android:background">@drawable/bg_codemy_button_secondary</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <!-- ════════════════════════════════════════════════════════════
+         TEXT STYLES
+         ════════════════════════════════════════════════════════════ -->
+    
+    <!-- Базовый текстовый стиль -->
+    <style name="CodemyText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <!-- Базовый стиль заголовка -->
+    <style name="CodemyText.Heading">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/nunitosans</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+    <style name="CodemyText.Heading.Large">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="CodemyText.Heading.Medium">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="CodemyText.Heading.Small">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="CodemyText.Body">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+    </style>
+
+    <style name="CodemyText.Body.Secondary">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textColor">#B3FFFFFF</item>
+    </style>
+
+    <style name="CodemyText.Code">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/sourcecodepro</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+
+    <style name="CodemyText.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textColor">#80FFFFFF</item>
+    </style>
+
+    <!-- ════════════════════════════════════════════════════════════
+         INPUT STYLES
+         ════════════════════════════════════════════════════════════ -->
+    
+    <!-- Базовый стиль input -->
+    <style name="CodemyInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">@color/colorSecondary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:padding">14dp</item>
+    </style>
+
+    <style name="CodemyInput.Code">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">@color/colorSecondary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textColorHint">#80B6FF00</item>
+        <item name="android:fontFamily">@font/sourcecodepro</item>
+        <item name="android:gravity">top</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:minLines">6</item>
+        <item name="android:inputType">textMultiLine</item>
+    </style>
+
+    <style name="CodemyInput.Standard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:backgroundTint">@color/colorSecondary</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textColorHint">#80FFFFFF</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- ════════════════════════════════════════════════════════════
+         CARD STYLES
+         ════════════════════════════════════════════════════════════ -->
+    
+    <!-- Базовый стиль карточки -->
+    <style name="CodemyCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/colorBackgroundLight</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="CodemyCard.Lesson">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/colorBackgroundLight</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+    </style>
+
+    <!-- ════════════════════════════════════════════════════════════
+         BOTTOM NAVIGATION STYLES
+         ════════════════════════════════════════════════════════════ -->
+
+    <style name="CodemyBottomNav">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:background">@color/colorBackground</item>
+        <item name="android:elevation">8dp</item>
+    </style>
+
+    <style name="CodemyBottomNavItem">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+    </style>
+
+</resources>

@@ -2,53 +2,112 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:padding="20dp">
+    android:background="@color/colorBackground">
 
-    <!-- Выбор языка / курса -->
-    <Spinner
-        android:id="@+id/courseSpinner"
+    <!-- Верхняя панель с заголовком и прогрессом -->
+    <LinearLayout
+        android:id="@+id/headerPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:backgroundTint="@color/colorSecondary"
-        android:popupBackground="@color/colorBackground" />
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_alignParentTop="true">
 
-    <!-- Заголовок (будет меняться в зависимости от выбранного курса) -->
+        <!-- Выбор курса со стрелкой -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_spinner_field"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <Spinner
+                android:id="@+id/courseSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:popupBackground="@color/colorBackgroundLight"
+                android:spinnerMode="dropdown" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_arrow_drop_down"
+                android:contentDescription="Выбрать курс"
+                android:tint="#80FFFFFF" />
+        </LinearLayout>
+
+        <!-- Заголовок -->
+        <TextView
+            android:id="@+id/textSectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Обучение"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorTextPrimary"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Карточка ежедневной цели (прозрачная) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_goal_card"
+            android:padding="20dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📊 Цель дня"
+                android:textSize="14sp"
+                android:fontFamily="@font/rubik"
+                android:textColor="#80FFFFFF"
+                android:layout_marginBottom="12dp" />
+
+            <ProgressBar
+                android:id="@+id/progressDailyGoal"
+                android:layout_width="match_parent"
+                android:layout_height="16dp"
+                android:max="100"
+                android:progress="45"
+                android:progressTint="@color/colorAccent"
+                android:background="@drawable/bg_progress_track"
+                style="?android:attr/progressBarStyleHorizontal" />
+
+            <TextView
+                android:id="@+id/textDailyGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="9 / 20 XP"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/nunitosans"
+                android:textColor="@color/colorTextPrimary"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Заголовок списка уроков -->
     <TextView
-        android:id="@+id/textSectionTitle"
+        android:id="@+id/textLessonsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/courseSpinner"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:text="Доступные уроки"
+        android:textSize="18sp"
+        android:textStyle="bold"
         android:fontFamily="@font/nunitosans"
-        android:text="Обучение"
         android:textColor="@color/colorTextPrimary"
-        android:textSize="22sp" />
-
-    <!-- Ежедневная цель -->
-    <ProgressBar
-        android:id="@+id/progressDailyGoal"
-        android:layout_width="match_parent"
-        android:layout_height="12dp"
-        android:layout_below="@id/textSectionTitle"
-        android:layout_marginTop="20dp"
-        android:max="100"
-        android:progress="45"
-        android:progressTint="@color/colorAccent"
-        style="?android:attr/progressBarStyleHorizontal" />
-
-    <TextView
-        android:id="@+id/textDailyGoal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/progressDailyGoal"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/rubik"
-        android:text="Цель дня: 9 / 20 XP"
-        android:textColor="@color/colorTextPrimary" />
+        android:layout_below="@id/headerPanel"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="12dp" />
 
     <!-- Список уроков -->
     <androidx.recyclerview.widget.RecyclerView
@@ -56,75 +115,29 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_above="@id/btnStartTraining"
-        android:layout_below="@id/textDailyGoal"
-        android:layout_marginTop="24dp"
+        android:layout_below="@id/textLessonsTitle"
+        android:layout_marginTop="8dp"
         android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         android:paddingBottom="16dp"
         android:scrollbars="vertical" />
 
     <!-- Кнопка "Начать тренировку" -->
     <Button
         android:id="@+id/btnStartTraining"
+        style="@style/CodemyButton.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="80dp"
-        android:backgroundTint="@color/colorAccent"
-        android:fontFamily="@font/rubik"
-        android:text="Начать тренировку"
-        android:textColor="@color/colorBackground"
-        android:textStyle="bold" />
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="90dp"
+        android:text="▶ Начать тренировку" />
 
     <!-- Нижняя навигация -->
-    <LinearLayout
+    <include
         android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/colorBackground"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏠"
-            android:textColor="@color/colorAccent"
-            android:textSize="28sp" />
-
-        <TextView
-            android:id="@+id/navSandbox"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="⌨️"
-            android:textColor="@color/colorTextPrimary"
-            android:textSize="28sp" />
-
-        <TextView
-            android:id="@+id/navTrophy"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏆"
-            android:textColor="@color/colorTextPrimary"
-            android:textSize="28sp" />
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="👤"
-            android:textColor="@color/colorTextPrimary"
-            android:textSize="28sp" />
-    </LinearLayout>
+        layout="@layout/include_bottom_navigation" />
 
 </RelativeLayout>

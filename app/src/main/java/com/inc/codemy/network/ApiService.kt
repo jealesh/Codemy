@@ -1,6 +1,7 @@
 package com.inc.codemy.network
 
 import com.inc.codemy.models.CourseResponse
+import com.inc.codemy.models.LeaderboardResponse
 import com.inc.codemy.models.LessonResponse
 import com.inc.codemy.models.RegisterRequest
 import com.inc.codemy.models.RegisterResponse
@@ -38,4 +39,15 @@ interface ApiService {
         @Path("lessonId") lessonId: Long,
         @Query("userId") userId: Long
     ): LessonResponse
+
+    @GET("leaderboard/weekly")
+    suspend fun getWeeklyLeaderboard(
+        @Query("userId") userId: Long
+    ): LeaderboardResponse
+
+    @POST("user-stats/add-xp")
+    suspend fun addXp(
+        @Query("userId") userId: Long,
+        @Query("xpAmount") xpAmount: Int
+    ): Map<String, String>
 }

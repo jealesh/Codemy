@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,26 +11,80 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
-            android:id="@+id/textQuestion"
+        <!-- Question Card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_code_editor"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/textQuestion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="17sp"
+                android:fontFamily="@font/rubik"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+
+        <!-- Options Container -->
+        <LinearLayout
+            android:id="@+id/optionsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_marginBottom="24dp" />
 
-        <RadioGroup
-            android:id="@+id/radioGroupOptions"
+        <!-- Result Feedback -->
+        <TextView
+            android:id="@+id/textResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp" />
+            android:textColor="@color/colorTextPrimary"
+            android:textSize="15sp"
+            android:fontFamily="@font/sourcecodepro"
+            android:background="@drawable/bg_result_success"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone"
+            android:lineSpacingExtra="4dp" />
 
+        <!-- Check Button -->
         <Button
             android:id="@+id/btnCheck"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/CodemyButton.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
             android:text="Проверить"
-            android:layout_gravity="end" />
+            android:stateListAnimator="@null"
+            android:gravity="center" />
+
+        <!-- Next Step Button (hidden by default) -->
+        <Button
+            android:id="@+id/btnNext"
+            style="@style/CodemyButton.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Перейти на следующий шаг"
+            android:stateListAnimator="@null"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_marginTop="12dp" />
+
+        <!-- Retry Button (hidden by default) -->
+        <Button
+            android:id="@+id/btnRetry"
+            style="@style/CodemyButton.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Попробовать снова"
+            android:stateListAnimator="@null"
+            android:visibility="gone"
+            android:gravity="center"
+            android:layout_marginTop="12dp" />
 
     </LinearLayout>
 </ScrollView>

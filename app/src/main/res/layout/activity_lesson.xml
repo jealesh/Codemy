@@ -4,18 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#1E1E1E"
-    android:padding="16dp">
+    android:background="@color/colorBackground">
 
-    <TextView
-        android:id="@+id/tvLessonTitle"
-        android:layout_width="wrap_content"
+    <!-- Заголовок -->
+    <LinearLayout
+        android:id="@+id/headerPanel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Урок"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="@drawable/bg_header_gradient"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvLessonTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Урок"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorTextPrimary" />
+    </LinearLayout>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
@@ -29,9 +39,11 @@
         android:layout_height="wrap_content"
         app:tabMode="scrollable"
         app:tabGravity="fill"
-        app:tabIndicatorColor="#00FF00"
-        app:tabSelectedTextColor="#FFFFFF"
-        app:tabTextColor="#AAAAAA"
-        app:tabIndicatorHeight="4dp" />
+        app:tabIndicatorColor="@color/colorAccent"
+        app:tabSelectedTextColor="@color/colorTextPrimary"
+        app:tabTextColor="#80FFFFFF"
+        app:tabIndicatorHeight="4dp"
+        app:tabBackground="@android:color/transparent"
+        android:layout_marginBottom="8dp" />
 
 </LinearLayout>

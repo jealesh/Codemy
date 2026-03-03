@@ -2,143 +2,141 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:padding="20dp">
+    android:background="@color/colorBackground">
 
-    <!-- Заголовок -->
-    <TextView
-        android:id="@+id/textTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Песочница"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/colorTextPrimary"
-        android:fontFamily="@font/nunitosans"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"/>
-
-    <!-- Выбор языка -->
-    <Spinner
-        android:id="@+id/languageSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textTitle"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="@color/colorSecondary"
-        android:popupBackground="@color/colorBackground"
-        android:spinnerMode="dropdown"/>
-
-    <!-- Поле кода -->
-    <EditText
-        android:id="@+id/inputCode"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_below="@id/languageSpinner"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/colorSecondary"
-        android:textColor="@color/colorTextPrimary"
-        android:textColorHint="@color/colorAccent"
-        android:hint="Введите код..."
-        android:gravity="top"
-        android:padding="12dp"
-        android:fontFamily="@font/sourcecodepro" />
-
-    <!-- Кнопка выполнения -->
-    <Button
-        android:id="@+id/btnRunCode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/inputCode"
-        android:layout_marginTop="16dp"
-        android:text="Выполнить"
-        android:backgroundTint="@color/colorAccent"
-        android:textColor="@color/colorBackground"
-        android:textStyle="bold"
-        android:fontFamily="@font/nunitosans" />
-
-    <!-- WebView для Pyodide (основной вывод для Python) -->
-    <WebView
-        android:id="@+id/webViewPyodide"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_below="@id/btnRunCode"
-        android:layout_marginTop="16dp"
-        android:visibility="gone" />
+    <!-- Верхняя часть с прокруткой -->
     <ScrollView
-        android:id="@+id/scrollOutput"
+        android:id="@+id/scrollContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/btnRunCode"
-        android:layout_marginTop="16dp"
-        android:layout_above="@id/bottomNav"
-        android:visibility="visible">
+        android:layout_above="@id/btnRunCode"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:fillViewport="false">
 
-    <!-- Запасной TextView (для других языков и ошибок) -->
-    <TextView
-        android:id="@+id/outputResult"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Результат появится здесь"
-        android:textColor="@color/colorTextPrimary"
-        android:fontFamily="@font/rubik"
-        android:padding="12dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Заголовок -->
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/nunitosans"
+                android:text="Песочница"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Выбор языка -->
+            <LinearLayout
+                android:id="@+id/langSelector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_spinner_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <Spinner
+                    android:id="@+id/languageSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:popupBackground="@color/colorBackgroundLight"
+                    android:spinnerMode="dropdown" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Выбрать язык"
+                    android:src="@drawable/ic_arrow_drop_down"
+                    android:tint="#80FFFFFF" />
+            </LinearLayout>
+
+            <!-- Поле 1: Код -->
+            <EditText
+                android:id="@+id/inputCode"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_code_editor"
+                android:fontFamily="@font/sourcecodepro"
+                android:gravity="top|start"
+                android:hint="print('Hello, World!')"
+                android:inputType="textMultiLine"
+                android:padding="16dp"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#40FFFFFF"
+                android:textSize="14sp" />
+
+            <!-- Поле 2: Входные данные (input) -->
+            <EditText
+                android:id="@+id/inputStdin"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/bg_input_field"
+                android:fontFamily="@font/sourcecodepro"
+                android:gravity="top|start"
+                android:hint="📥 Входные данные..."
+                android:inputType="textMultiLine"
+                android:padding="12dp"
+                android:textColor="@color/colorTextPrimary"
+                android:textColorHint="#40FFFFFF"
+                android:textSize="14sp" />
+
+            <!-- Вывод (видимый) -->
+            <ScrollView
+                android:id="@+id/scrollOutput"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/outputResult"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sourcecodepro"
+                    android:padding="16dp"
+                    android:text="Результат появится здесь"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="14sp" />
+            </ScrollView>
+
+            <!-- WebView (скрыт, но работает в фоне) -->
+            <WebView
+                android:id="@+id/webViewPyodide"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
     </ScrollView>
 
-    <!-- Нижняя навигация -->
-    <LinearLayout
-        android:id="@+id/bottomNav"
+    <!-- Кнопка выполнения (фиксированная) -->
+    <Button
+        android:id="@+id/btnRunCode"
+        style="@style/CodemyButton.Primary"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="10dp"
-        android:layout_alignParentBottom="true">
+        android:layout_height="56dp"
+        android:layout_above="@id/bottomNav"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:text="▶ Выполнить" />
 
-        <TextView
-            android:id="@+id/navHome"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏠"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navSandbox"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="⌨️"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorAccent" />
-
-        <TextView
-            android:id="@+id/navTrophy"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="🏆"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorTextPrimary" />
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="👤"
-            android:textSize="26sp"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorTextPrimary" />
-    </LinearLayout>
+    <!-- Нижняя навигация (фиксированная) -->
+    <include
+        android:id="@+id/bottomNav"
+        layout="@layout/include_bottom_navigation" />
 
 </RelativeLayout>

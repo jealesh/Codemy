@@ -6,6 +6,7 @@
 </head>
 <body>
 <script>
+    // Базовая функция для выполнения JS
     window.runJS = function(code) {
         try {
             // Перехватываем console.log и console.error
@@ -21,6 +22,42 @@
             eval(code);
         } catch (e) {
             console.error(e.message);
+        }
+    };
+
+    // Функция для выполнения JS с входными данными
+    window.runJSWithInput = function(code, stdin) {
+        try {
+            // Перехватываем console.log и console.error
+            console.log = function(...args) {
+                AndroidConsole.log(args.map(a => String(a)).join(' '));
+            };
+
+            console.error = function(...args) {
+                AndroidConsole.log('ERROR: ' + args.map(a => String(a)).join(' '));
+            };
+
+            // Создаём readline из stdin
+            const inputLines = stdin ? stdin.split('\n') : [];
+            let currentLine = 0;
+
+            // Глобальная функция readline() - возвращает строки из stdin
+            window.readline = function() {
+                if (currentLine < inputLines.length) {
+                    const line = inputLines[currentLine];
+                    currentLine++;
+                    return line;
+                }
+                return '';
+            };
+
+            // Глобальная функция input() - как в Python (для удобства)
+            window.input = window.readline;
+
+            // Выполняем код пользователя
+            eval(code);
+        } catch (e) {
+            console.error('ERROR: ' + e.message);
         }
     };
 </script>

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.inc.codemy.models.UserProfileResponse
@@ -42,16 +43,16 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         // Навигация
-        findViewById<TextView>(R.id.navHome).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
             finish()
         }
 
-        findViewById<TextView>(R.id.navSandbox).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navSandbox).setOnClickListener {
             startActivity(Intent(this, SandboxActivity::class.java))
         }
 
-        findViewById<TextView>(R.id.navTrophy).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navTrophy).setOnClickListener {
             startActivity(Intent(this, LeagueActivity::class.java))
         }
 
@@ -87,9 +88,9 @@ class ProfileActivity : AppCompatActivity() {
             profileLogin.text = profile.username ?: "username"
 
             // Статистика из user_stats
-            profileXP.text = "⚡ ${profile.total_xp} XP"
-            profileStreak.text = "🔥 Стрик: 0 дней" // заглушка, потом из базы
-            profileMaxStreak.text = "🏆 Лучший стрик: 0 дней" // заглушка
+            profileXP.text = "${profile.total_xp} XP"
+            profileStreak.text = "0 дней" // заглушка, потом из базы
+            profileMaxStreak.text = "0 дней" // заглушка
 
         } catch (e: Exception) {
             Log.e("ProfileActivity", "Ошибка при загрузке профиля: ${e.message}", e)

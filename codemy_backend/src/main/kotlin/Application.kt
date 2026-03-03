@@ -88,6 +88,24 @@ data class LessonSection(
     val options: List<String>? = null   // варианты для matching
 )
 
+@Serializable
+data class LeaderboardUserResponse(
+    val userId: Long,
+    val username: String,
+    val fullName: String?,
+    val weeklyXp: Int,
+    val rank: Int,
+    val avatarUrl: String?
+)
+
+@Serializable
+data class LeaderboardResponse(
+    val weekStart: String,
+    val daysRemaining: Int,
+    val users: List<LeaderboardUserResponse>,
+    val userRank: LeaderboardUserResponse?
+)
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         module()
@@ -213,10 +231,10 @@ fun Application.module() {
             try {
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                        SELECT u.full_name, u.username, us.total_xp, us.level, us.weekly_xp, 
-                               us.last_reset_week, us.updated_at 
-                        FROM app.users u 
-                        LEFT JOIN app.user_stats us ON u.id = us.user_id 
+                        SELECT u.full_name, u.username, us.total_xp, us.level, us.weekly_xp,
+                               us.last_reset_week, us.updated_at
+                        FROM app.users u
+                        LEFT JOIN app.user_stats us ON u.id = us.user_id
                         WHERE u.id = ?
                     """.trimIndent())
                     stmt.setLong(1, userId)
@@ -402,6 +420,123 @@ fun Application.module() {
                 }
             } catch (e: Exception) {
                 println("Ошибка в /lessons/$lessonId/content: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        // Leaderboard API
+        get("/leaderboard/weekly") {
+            val userId = call.request.queryParameters["userId"]?.toLongOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "userId required"))
+
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    // Получаем текущую неделю (понедельник)
+                    val now = java.time.OffsetDateTime.now()
+                    val monday = now.with(java.time.DayOfWeek.MONDAY).toLocalDate()
+                    val nextMonday = monday.plusWeeks(1)
+                    val daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now.toLocalDate(), nextMonday).toInt()
+
+                    // Топ пользователей за текущую неделю
+                    val stmt = conn.prepareStatement("""
+                        SELECT u.id, u.username, u.full_name, COALESCE(us.weekly_xp, 0) as weekly_xp,
+                               u.avatar_url,
+                               RANK() OVER (ORDER BY COALESCE(us.weekly_xp, 0) DESC) as rank
+                        FROM app.users u
+                        LEFT JOIN app.user_stats us ON u.id = us.user_id
+                        ORDER BY weekly_xp DESC
+                        LIMIT 100
+                    """.trimIndent())
+
+                    val rs = stmt.executeQuery()
+                    val users = mutableListOf<LeaderboardUserResponse>()
+
+                    while (rs.next()) {
+                        users.add(
+                            LeaderboardUserResponse(
+                                userId = rs.getLong("id"),
+                                username = rs.getString("username"),
+                                fullName = rs.getString("full_name"),
+                                weeklyXp = rs.getInt("weekly_xp"),
+                                rank = rs.getInt("rank"),
+                                avatarUrl = rs.getString("avatar_url")
+                            )
+                        )
+                    }
+
+                    // Позиция текущего пользователя
+                    var userRank: LeaderboardUserResponse? = null
+                    val userStmt = conn.prepareStatement("""
+                        SELECT u.id, u.username, u.full_name, COALESCE(us.weekly_xp, 0) as weekly_xp,
+                               u.avatar_url,
+                               (SELECT COUNT(DISTINCT us2.weekly_xp) + 1
+                                FROM app.user_stats us2
+                                WHERE us2.weekly_xp > COALESCE(us.weekly_xp, 0)) as rank
+                        FROM app.users u
+                        LEFT JOIN app.user_stats us ON u.id = us.user_id
+                        WHERE u.id = ?
+                    """.trimIndent())
+                    userStmt.setLong(1, userId)
+                    val userRs = userStmt.executeQuery()
+
+                    if (userRs.next()) {
+                        userRank = LeaderboardUserResponse(
+                            userId = userRs.getLong("id"),
+                            username = userRs.getString("username"),
+                            fullName = userRs.getString("full_name"),
+                            weeklyXp = userRs.getInt("weekly_xp"),
+                            rank = userRs.getInt("rank"),
+                            avatarUrl = userRs.getString("avatar_url")
+                        )
+                    }
+
+                    call.respond(
+                        HttpStatusCode.OK,
+                        LeaderboardResponse(
+                            weekStart = monday.toString(),
+                            daysRemaining = daysRemaining,
+                            users = users,
+                            userRank = userRank
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                println("Ошибка в /leaderboard/weekly: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+            }
+        }
+
+        // ────────────────────────────────────────────────
+        // Add XP endpoint
+        post("/user-stats/add-xp") {
+            val userId = call.request.queryParameters["userId"]?.toLongOrNull()
+                ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "userId required"))
+
+            val xpAmount = call.request.queryParameters["xpAmount"]?.toIntOrNull()
+                ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "xpAmount required"))
+
+            try {
+                DatabaseFactory.getConnection().use { conn ->
+                    // Обновляем total_xp и weekly_xp
+                    conn.prepareStatement("""
+                        UPDATE app.user_stats
+                        SET total_xp = total_xp + ?,
+                            weekly_xp = weekly_xp + ?,
+                            updated_at = ?
+                        WHERE user_id = ?
+                    """.trimIndent()).use { stmt ->
+                        stmt.setInt(1, xpAmount)
+                        stmt.setInt(2, xpAmount)
+                        stmt.setTimestamp(3, java.sql.Timestamp(System.currentTimeMillis()))
+                        stmt.setLong(4, userId)
+                        stmt.executeUpdate()
+                    }
+
+                    call.respond(HttpStatusCode.OK, mapOf("message" to "XP added successfully"))
+                }
+            } catch (e: Exception) {
+                println("Ошибка в /user-stats/add-xp: ${e.message}")
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }

@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
@@ -74,19 +75,22 @@ class MainScreenActivity : AppCompatActivity() {
         }
 
         // Нижняя навигация
-        findViewById<TextView>(R.id.navProfile).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
             finish()
         }
 
-        findViewById<TextView>(R.id.navSandbox).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navSandbox).setOnClickListener {
             startActivity(Intent(this, SandboxActivity::class.java))
-            finish()
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
         }
 
-        findViewById<TextView>(R.id.navTrophy).setOnClickListener {
+        findViewById<LinearLayout>(R.id.navTrophy).setOnClickListener {
             startActivity(Intent(this, LeagueActivity::class.java))
-            finish()
+        }
+
+        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
+            // Уже на главной, ничего не делаем
         }
 
         // Временный захардкод ежедневной цели (потом из API / БД)
