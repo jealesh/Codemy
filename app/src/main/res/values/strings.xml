@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Codemy</string>
+
+    <!-- Content descriptions -->
+    <string name="avatar_content_description">Avatar</string>
+    <string name="lesson_icon_content_description">Lesson icon</string>
+    <string name="nav_home_content_description">Home</string>
+    <string name="nav_sandbox_content_description">Sandbox</string>
+    <string name="nav_trophy_content_description">Trophy</string>
+    <string name="nav_profile_content_description">Profile</string>
 </resources>

@@ -30,6 +30,7 @@ class MatchingFragment : Fragment() {
 
     private var selectedPosition = -1
     private var isSolvedCorrectly = false
+    private val optionViews = mutableListOf<View>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,10 +53,15 @@ class MatchingFragment : Fragment() {
         // Создаем кастомные RadioButton-подобные view
         options.forEachIndexed { index, option ->
             val optionView = createOptionView(option, index)
+            optionViews.add(optionView)
+            
             optionView.setOnClickListener {
+                // Если кликнули на уже выбранный - ничего не делаем (только один выбор)
+                if (selectedPosition == index) return@setOnClickListener
+
                 // Сбрасываем выделение с предыдущего
                 if (selectedPosition != -1) {
-                    val previousView = optionsContainer.getChildAt(selectedPosition)
+                    val previousView = optionViews[selectedPosition]
                     previousView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_option_unselected)
                     val previousText = previousView.findViewById<TextView>(android.R.id.text1)
                     previousText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
@@ -119,13 +125,13 @@ class MatchingFragment : Fragment() {
         btnRetry.setOnClickListener {
             // Сбрасываем выделение
             if (selectedPosition != -1) {
-                val previousView = optionsContainer.getChildAt(selectedPosition)
+                val previousView = optionViews[selectedPosition]
                 previousView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_option_unselected)
                 val previousText = previousView.findViewById<TextView>(android.R.id.text1)
                 previousText.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
             }
             selectedPosition = -1
-            
+
             // Сбрасываем результат
             textResult.visibility = View.GONE
             textResult.text = ""

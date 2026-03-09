@@ -32,15 +32,17 @@
         android:id="@+id/userAvatar"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_avatar_placeholder"
+        android:src="@drawable/ic_user_avatar"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/bg_avatar_circle" />
+        android:background="@drawable/bg_text_transparent"
+        android:contentDescription="@string/avatar_content_description" />
 
     <!-- Информация -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:background="@drawable/bg_text_transparent"
         android:orientation="vertical">
 
         <TextView
@@ -48,6 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Имя пользователя"
+            android:background="@drawable/bg_text_transparent"
             android:textSize="16sp"
             android:textStyle="bold"
             android:fontFamily="@font/nunitosans"
@@ -58,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1500 XP за 7 дней"
+            android:background="@drawable/bg_text_transparent"
             android:textSize="14sp"
             android:fontFamily="@font/rubik"
             android:textColor="@color/colorAccent"
@@ -70,6 +74,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="28sp"
+        android:background="@drawable/bg_text_transparent"
         android:visibility="gone" />
 
 </LinearLayout>

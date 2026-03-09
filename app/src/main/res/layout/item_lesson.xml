@@ -12,15 +12,16 @@
     <LinearLayout
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:background="@drawable/bg_lesson_icon"
+        android:background="@drawable/bg_text_transparent"
         android:gravity="center"
         android:layout_marginEnd="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📚"
-            android:textSize="28sp" />
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_text_transparent"
+            android:src="@drawable/ic_code_browser"
+            android:contentDescription="@string/lesson_icon_content_description" />
     </LinearLayout>
 
     <!-- Информация об уроке -->
@@ -28,12 +29,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:background="@drawable/bg_text_transparent"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/textLessonTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/bg_text_transparent"
             android:text="Ввод и вывод данных"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -46,6 +49,7 @@
             android:layout_height="wrap_content"
             android:text="0%"
             android:textSize="14sp"
+            android:background="@drawable/bg_text_transparent"
             android:fontFamily="@font/rubik"
             android:textColor="@color/colorAccent"
             android:layout_marginTop="4dp" />

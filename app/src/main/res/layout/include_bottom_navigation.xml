@@ -22,11 +22,11 @@
         android:gravity="center"
         android:background="?attr/selectableItemBackgroundBorderless">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🏠"
-            android:textSize="22sp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_home"
+            android:contentDescription="@string/nav_home_content_description" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,11 +47,11 @@
         android:gravity="center"
         android:background="?attr/selectableItemBackgroundBorderless">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⌨️"
-            android:textSize="22sp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_sandbox"
+            android:contentDescription="@string/nav_sandbox_content_description" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,11 +72,11 @@
         android:gravity="center"
         android:background="?attr/selectableItemBackgroundBorderless">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🏆"
-            android:textSize="22sp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_trophy"
+            android:contentDescription="@string/nav_trophy_content_description" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -97,11 +97,11 @@
         android:gravity="center"
         android:background="?attr/selectableItemBackgroundBorderless">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="👤"
-            android:textSize="22sp" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_profile"
+            android:contentDescription="@string/nav_profile_content_description" />
 
         <TextView
             android:layout_width="wrap_content"

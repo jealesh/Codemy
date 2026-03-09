@@ -19,6 +19,7 @@
         <TextView
             android:id="@+id/tvLessonTitle"
             android:layout_width="wrap_content"
+            android:background="@drawable/bg_text_transparent"
             android:layout_height="wrap_content"
             android:text="Урок"
             android:textSize="24sp"

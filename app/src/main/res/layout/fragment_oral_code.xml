@@ -23,6 +23,7 @@
             <TextView
                 android:id="@+id/textQuestion"
                 android:layout_width="match_parent"
+                android:background="@drawable/bg_text_transparent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorTextPrimary"
                 android:textSize="17sp"

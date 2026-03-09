@@ -25,6 +25,7 @@
                 android:id="@+id/textTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_text_transparent"
                 android:layout_gravity="center_horizontal"
                 android:fontFamily="@font/nunitosans"
                 android:text="Песочница"

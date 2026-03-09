@@ -18,6 +18,7 @@
         <TextView
             android:id="@+id/textLeagueName"
             android:layout_width="wrap_content"
+            android:background="@drawable/bg_text_transparent"
             android:layout_height="wrap_content"
             android:text="🏆 Еженедельный рейтинг"
             android:textSize="24sp"
@@ -30,6 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="2 дня до завершения недели"
+            android:background="@drawable/bg_text_transparent"
             android:textSize="14sp"
             android:fontFamily="@font/rubik"
             android:textColor="@color/colorAccent"
