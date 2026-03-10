@@ -38,7 +38,7 @@
             android:orientation="vertical"
             android:background="@drawable/bg_input_field"
             android:padding="4dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="8dp">
 
             <EditText
                 android:id="@+id/inputAnswer"
@@ -54,6 +54,19 @@
                 android:minHeight="60dp"
                 android:gravity="center_vertical" />
         </LinearLayout>
+
+        <!-- XP Reward Label -->
+        <TextView
+            android:id="@+id/textXpReward"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+3 XP за решение."
+            android:textColor="#FFD700"
+            android:textSize="14sp"
+            android:fontFamily="@font/rubik"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
 
         <!-- Result Feedback -->
         <TextView

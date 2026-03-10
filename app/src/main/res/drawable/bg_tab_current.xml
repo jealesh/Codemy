@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Glow effect (outer shadow) -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#40FFFFFF" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+    <!-- Main circle with white stroke -->
+    <item
+        android:left="4dp"
+        android:top="4dp"
+        android:right="4dp"
+        android:bottom="4dp">
+        <shape android:shape="oval">
+            <stroke
+                android:width="2dp"
+                android:color="@color/colorTextPrimary" />
+            <solid android:color="@android:color/transparent" />
+            <size android:width="40dp" android:height="40dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.inc.codemy.utils.ProgressSyncManager
 
 class ProgrammingFragment : Fragment() {
 
@@ -22,12 +23,23 @@ class ProgrammingFragment : Fragment() {
         private const val ARG_ANSWER = "answer"
         private const val ARG_STDIN = "stdin"
         private const val ARG_EXPECTED_OUTPUT = "expectedOutput"
+        private const val ARG_USER_ID = "user_id"
+        private const val ARG_EXERCISE_ID = "exercise_id"
+        private const val ARG_LESSON_ID = "lesson_id"
+        private const val ARG_POSITION = "position"
+        const val EXERCISE_TYPE = "programming"
+        const val XP_REWARD = 5
 
         fun newInstance(
             question: String,
             correctAnswer: String?,
             stdin: String? = null,
-            expectedOutput: String? = null
+            expectedOutput: String? = null,
+            userId: Long = 1L,
+            exerciseId: Long = 0L,
+            lessonId: Long = 0L,
+            position: Int = -1,
+            isCompleted: Boolean = false
         ): ProgrammingFragment {
             val fragment = ProgrammingFragment()
             fragment.arguments = Bundle().apply {
@@ -35,6 +47,11 @@ class ProgrammingFragment : Fragment() {
                 putString(ARG_ANSWER, correctAnswer)
                 putString(ARG_STDIN, stdin)
                 putString(ARG_EXPECTED_OUTPUT, expectedOutput)
+                putLong(ARG_USER_ID, userId)
+                putLong(ARG_EXERCISE_ID, exerciseId)
+                putLong(ARG_LESSON_ID, lessonId)
+                putInt(ARG_POSITION, position)
+                putBoolean("isCompleted", isCompleted)
             }
             return fragment
         }
@@ -43,6 +60,7 @@ class ProgrammingFragment : Fragment() {
     private var isTestPassed = false
     private var isPyodideReady = false
     private var isSolvedCorrectly = false
+    private var xpAwarded = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,6 +72,8 @@ class ProgrammingFragment : Fragment() {
         val correct = arguments?.getString(ARG_ANSWER) ?: ""
         val expectedStdin = arguments?.getString(ARG_STDIN) ?: ""
         val expectedOutput = arguments?.getString(ARG_EXPECTED_OUTPUT) ?: ""
+        val position = arguments?.getInt(ARG_POSITION) ?: -1
+        val isCompleted = arguments?.getBoolean("isCompleted") ?: false
 
         view.findViewById<TextView>(R.id.textQuestion)?.text = question
 
@@ -66,6 +86,7 @@ class ProgrammingFragment : Fragment() {
         val textTestResult = view.findViewById<TextView>(R.id.textTestResult)
         val textTestLabel = view.findViewById<TextView>(R.id.textTestLabel)
         val textExpectedOutput = view.findViewById<TextView>(R.id.textExpectedOutput)
+        val textXpReward = view.findViewById<TextView>(R.id.textXpReward)
         val webView = view.findViewById<WebView>(R.id.webViewPyodide)
 
         // Показываем ожидаемый вывод если есть
@@ -90,6 +111,33 @@ class ProgrammingFragment : Fragment() {
             }
         }
         webView.loadUrl("file:///android_res/raw/pyodide_runner.html")
+
+        // Если упражнение уже выполнено - показываем состояние завершения
+        // Но позволяем решить повторно
+        if (isCompleted) {
+            btnRun.isEnabled = true
+            btnRun.alpha = 1.0f
+            btnSubmit.isEnabled = true
+            btnSubmit.alpha = 1.0f
+            btnSubmit.text = "Отправить"
+            btnSubmit.visibility = View.VISIBLE
+            btnRun.visibility = View.VISIBLE
+            btnNext.visibility = View.GONE
+            btnRetry.visibility = View.GONE
+            inputCode.isEnabled = true
+            inputStdin.isEnabled = true
+            textTestLabel.visibility = View.GONE
+            textTestResult.visibility = View.GONE
+            textTestResult.text = ""
+            isTestPassed = false
+            isSolvedCorrectly = false
+            xpAwarded = false
+            // Отмечаем как выполненное в адаптере и обновляем цвет
+            (activity as? LessonActivity)?.let { activity ->
+                activity.adapter.setCompleted(position, true)
+                activity.tabColors[position] = true
+            }
+        }
 
         // Кнопка "Тест" - запускаем код через Pyodide
         btnRun.setOnClickListener {
@@ -204,7 +252,6 @@ class ProgrammingFragment : Fragment() {
 
             // Проверяем код на соответствие правильному ответу
             if (code.equals(correct.trim(), ignoreCase = true)) {
-                Toast.makeText(requireContext(), "Правильно! +XP", Toast.LENGTH_SHORT).show()
                 isSolvedCorrectly = true
                 btnSubmit.isEnabled = false
                 btnSubmit.alpha = 0.5f
@@ -215,10 +262,24 @@ class ProgrammingFragment : Fragment() {
                 btnRun.visibility = View.GONE
                 btnNext.visibility = View.VISIBLE
                 btnRetry.visibility = View.VISIBLE
+
+                // Отмечаем упражнение как выполненное
+                if (position >= 0) {
+                    (activity as? LessonActivity)?.adapter?.setCompleted(position, true)
+                }
+
+                // Синхронизируем прогресс и начисляем XP
+                if (!xpAwarded) {
+                    syncProgress(isCorrect = true)
+                    xpAwarded = true
+                }
             } else {
                 Toast.makeText(requireContext(), "Код не совпадает с правильным решением", Toast.LENGTH_LONG).show()
                 btnRetry.visibility = View.VISIBLE
                 btnNext.visibility = View.GONE
+                
+                // Записываем попытку без XP
+                syncProgress(isCorrect = false)
             }
         }
 
@@ -228,5 +289,28 @@ class ProgrammingFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun syncProgress(isCorrect: Boolean) {
+        val userId = arguments?.getLong(ARG_USER_ID) ?: 1L
+        val exerciseId = arguments?.getLong(ARG_EXERCISE_ID) ?: 0L
+        val lessonId = arguments?.getLong(ARG_LESSON_ID) ?: 0L
+
+        ProgressSyncManager.syncExerciseCompletion(
+            fragment = this,
+            userId = userId,
+            exerciseId = exerciseId,
+            lessonId = lessonId,
+            exerciseType = EXERCISE_TYPE,
+            isCorrect = isCorrect
+        ) { response ->
+            if (response.success && isCorrect) {
+                if (response.alreadyCompleted) {
+                    Toast.makeText(context, "Упражнение уже завершено", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, response.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ object UserStats : LongIdTable("app.user_stats") {
     val totalXp       = long("total_xp").default(0L)
     val level         = integer("level").default(1)
     val weeklyXp      = integer("weekly_xp").default(0)
+    val dailyGoal     = integer("daily_goal").default(20)
     val lastResetWeek = date("last_reset_week").nullable()
     val updatedAt     = timestampWithTimeZone("updated_at")
 }

@@ -37,7 +37,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="16dp" />
+
+        <!-- XP Reward Label -->
+        <TextView
+            android:id="@+id/textXpReward"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="+2 XP за решение."
+            android:textColor="#FFD700"
+            android:textSize="14sp"
+            android:fontFamily="@font/rubik"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
 
         <!-- Result Feedback -->
         <TextView

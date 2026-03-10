@@ -22,8 +22,8 @@ object DatabaseFactory {
 
             // Теперь создаём таблицы
             SchemaUtils.createMissingTablesAndColumns(
-                Users, Courses, Lessons, UserLessonProgress,
-                UserDailyActivity, UserStats, Achievements, UserAchievements
+                Users, Courses, Lessons, Exercise, ExerciseProgress,
+                UserLessonProgress, UserDailyActivity, UserStats, Achievements, UserAchievements
             )
 
             // ALTER дефолтных значений

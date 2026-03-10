@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/colorBackground">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📊 Цель на день"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/nunitosans"
+        android:textColor="@color/colorTextPrimary"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Сколько XP вы хотите заработать сегодня?"
+        android:textSize="14sp"
+        android:fontFamily="@font/rubik"
+        android:textColor="@color/colorTextSecondary"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="24dp">
+
+        <Button
+            android:id="@+id/btnDecreaseGoal"
+            style="@style/CodemyButton.Secondary"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:text="−"
+            android:textSize="24sp"
+            android:padding="0dp"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/textGoalValue"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="20 XP"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/nunitosans"
+            android:textColor="@color/colorAccent"
+            android:gravity="center"
+            android:layout_marginHorizontal="16dp" />
+
+        <Button
+            android:id="@+id/btnIncreaseGoal"
+            style="@style/CodemyButton.Secondary"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:text="+"
+            android:textSize="24sp"
+            android:padding="0dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/seekBarGoal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:min="10"
+        android:max="200"
+        android:progress="20"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btnCancelGoal"
+            style="@style/CodemyButton.Outline.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="Отмена"
+            android:layout_marginEnd="8dp"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/btnSaveGoal"
+            style="@style/CodemyButton.Outline"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="Сохранить"
+            android:layout_marginStart="8dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+</LinearLayout>
