@@ -14,7 +14,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.inc.codemy.utils.ProgressSyncManager
+import kotlinx.coroutines.launch
 
 class ProgrammingFragment : Fragment() {
 
@@ -35,9 +37,9 @@ class ProgrammingFragment : Fragment() {
             correctAnswer: String?,
             stdin: String? = null,
             expectedOutput: String? = null,
-            userId: Long = 1L,
-            exerciseId: Long = 0L,
-            lessonId: Long = 0L,
+            userId: Long = -1L,
+            exerciseId: Long = -1L,
+            lessonId: Long = -1L,
             position: Int = -1,
             isCompleted: Boolean = false
         ): ProgrammingFragment {
@@ -292,18 +294,18 @@ class ProgrammingFragment : Fragment() {
     }
 
     private fun syncProgress(isCorrect: Boolean) {
-        val userId = arguments?.getLong(ARG_USER_ID) ?: 1L
-        val exerciseId = arguments?.getLong(ARG_EXERCISE_ID) ?: 0L
-        val lessonId = arguments?.getLong(ARG_LESSON_ID) ?: 0L
+        val userId = arguments?.getLong(ARG_USER_ID) ?: return
+        val exerciseId = arguments?.getLong(ARG_EXERCISE_ID) ?: return
+        val lessonId = arguments?.getLong(ARG_LESSON_ID) ?: return
 
-        ProgressSyncManager.syncExerciseCompletion(
-            fragment = this,
-            userId = userId,
-            exerciseId = exerciseId,
-            lessonId = lessonId,
-            exerciseType = EXERCISE_TYPE,
-            isCorrect = isCorrect
-        ) { response ->
+        lifecycleScope.launch {
+            val response = ProgressSyncManager.syncExerciseCompletionAsync(
+                userId = userId,
+                exerciseId = exerciseId,
+                lessonId = lessonId,
+                exerciseType = EXERCISE_TYPE,
+                isCorrect = isCorrect
+            )
             if (response.success && isCorrect) {
                 if (response.alreadyCompleted) {
                     Toast.makeText(context, "Упражнение уже завершено", Toast.LENGTH_SHORT).show()

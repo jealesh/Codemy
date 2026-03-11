@@ -13,7 +13,7 @@ interface CompletionListener {
 class LessonSectionsPagerAdapter(
     fa: FragmentActivity,
     private val sections: List<LessonSection>,
-    private val userId: Long = 1L,
+    private val userId: Long = -1L,
     private val lessonId: Long = 0L,
     private val completedExerciseIds: Set<Long> = emptySet()
 ) : FragmentStateAdapter(fa) {
@@ -43,7 +43,7 @@ class LessonSectionsPagerAdapter(
         val exerciseId = section.id ?: 0L
         // Проверяем, выполнено ли упражнение (только для задач, не для теории)
         val isCompleted = completedExerciseIds.contains(exerciseId)
-        
+
         return when (section.type) {
             "theory" -> TheoryFragment.newInstance(section.text, position, exerciseId, lessonId, userId)
             "oral_code" -> OralCodeFragment.newInstance(

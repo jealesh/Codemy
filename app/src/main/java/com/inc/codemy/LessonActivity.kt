@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -22,10 +23,13 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
+    private lateinit var progressLesson: ProgressBar
+    private lateinit var tvLessonProgress: TextView
     lateinit var adapter: LessonSectionsPagerAdapter
     private var lessonId: Long = -1L
-    private var userId: Long = 1L // TODO: получить из сессии
-    
+    private var userId: Long = -1L
+    private var totalSections: Int = 0
+
     // Храним состояние цветов для каждого таба
     val tabColors = mutableMapOf<Int, Boolean>() // position -> isCompleted
     private var currentTabPosition: Int = 0 // Текущий выбранный таб
@@ -36,13 +40,15 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
 
         viewPager = findViewById(R.id.viewPager)
         tabLayout = findViewById(R.id.tabLayout)
+        progressLesson = findViewById(R.id.progressLesson)
+        tvLessonProgress = findViewById(R.id.tvLessonProgress)
 
         lessonId = intent.getLongExtra("LESSON_ID", -1L)
         val title = intent.getStringExtra("LESSON_TITLE") ?: "Урок"
 
         val titleTextView = findViewById<TextView>(R.id.tvLessonTitle)
         titleTextView.text = title
-        
+
         // Добавляем клик на заголовок для возврата на главную
         findViewById<LinearLayout>(R.id.headerPanel).setOnClickListener {
             finish()
@@ -54,6 +60,18 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
             return
         }
 
+        // Получаем userId из SharedPreferences
+        val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
+        userId = sharedPref.getLong("user_id", -1L)
+        if (userId == -1L) {
+            Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // Оптимизация: ограничиваем количество предварительно загружаемых страниц
+        viewPager.offscreenPageLimit = 1
+
         loadLesson()
     }
 
@@ -61,18 +79,18 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
         lifecycleScope.launch {
             try {
                 val lesson = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.getLessonContent(lessonId, 1L) // userId = 1
+                    ApiClient.apiService.getLessonContent(lessonId, userId)
                 }
 
                 val count = lesson.content.size
-                Toast.makeText(this@LessonActivity, "Загружено карточек: $count", Toast.LENGTH_LONG).show()
+                totalSections = count
 
-                findViewById<TextView>(R.id.tvLessonTitle)?.text = "${lesson.title} ($count карточек)"
+                findViewById<TextView>(R.id.tvLessonTitle)?.text = lesson.title
 
                 // Загружаем прогресс упражнений для этого урока
                 val exercisesProgress = withContext(Dispatchers.IO) {
                     try {
-                        ApiClient.apiService.getExercisesProgress(1L, lessonId)
+                        ApiClient.apiService.getExercisesProgress(userId, lessonId)
                     } catch (e: Exception) {
                         null
                     }
@@ -82,23 +100,31 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
                 val completedExerciseIds: Set<Long> = exercisesProgress?.completedExerciseIds?.toSet() ?: emptySet()
 
                 // Настраиваем ViewPager
-                adapter = LessonSectionsPagerAdapter(this@LessonActivity, lesson.content, userId, lessonId, completedExerciseIds)
+                adapter = LessonSectionsPagerAdapter(
+                    this@LessonActivity,
+                    lesson.content,
+                    userId,
+                    lessonId,
+                    completedExerciseIds
+                )
                 adapter.setCompletionListener(this@LessonActivity)
                 viewPager.adapter = adapter
 
                 // Инициализируем все табы
+                var completedCount = 0
                 for (i in 0 until lesson.content.size) {
-                    // Таб выполнен, только если упражнение есть в completedExerciseIds (теория НЕ отмечается сразу)
                     val section = lesson.content[i]
                     val isCompleted = section.id != null && completedExerciseIds.contains(section.id)
                     tabColors[i] = isCompleted
+                    if (isCompleted) completedCount++
                 }
-                println("[LessonActivity] Initial tabColors: $tabColors")
+
+                // Обновляем прогресс урока
+                updateLessonProgress(completedCount)
 
                 // Связываем TabLayout с ViewPager (номера карточек)
                 TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                     tab.text = "${position + 1}"
-                    // Устанавливаем цвет таба на основе сохранённого состояния
                     val isCompleted = tabColors[position] ?: false
                     val isCurrent = position == currentTabPosition
                     updateTabColor(tab, position, isCompleted, isCurrent)
@@ -110,10 +136,6 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
                         tab?.let {
                             val position = it.position
                             currentTabPosition = position
-                            val color = tabColors[position] ?: false
-                            println("[TabListener] onTabSelected: position=$position, color=$color, tabColors=$tabColors")
-                            
-                            // Обновляем ВСЕ табы - только текущий должен иметь подчёркивание
                             refreshAllTabs()
                         }
                     }
@@ -121,10 +143,7 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
                     override fun onTabReselected(tab: TabLayout.Tab?) {
                         tab?.let {
                             val position = it.position
-                            val color = tabColors[position] ?: false
-                            println("[TabListener] onTabReselected: position=$position, color=$color, tabColors=$tabColors")
-                            
-                            // Обновляем ВСЕ табы
+                            currentTabPosition = position
                             refreshAllTabs()
                         }
                     }
@@ -137,12 +156,23 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
     }
 
     override fun onExerciseCompleted(position: Int, isCompleted: Boolean) {
-        // Сохраняем состояние
         tabColors[position] = isCompleted
-        println("[LessonActivity] onExerciseCompleted: position=$position, isCompleted=$isCompleted, tabColors=$tabColors")
-
-        // Обновляем ВСЕ табы
         refreshAllTabs()
+        
+        // Считаем количество выполненных
+        val completedCount = tabColors.count { it.value }
+        updateLessonProgress(completedCount)
+    }
+
+    /**
+     * Обновляет прогресс урока (процент и прогресс бар)
+     */
+    private fun updateLessonProgress(completedCount: Int) {
+        if (totalSections <= 0) return
+        
+        val percentage = (completedCount * 100) / totalSections
+        tvLessonProgress.text = "$percentage%"
+        progressLesson.progress = percentage
     }
 
     /**
@@ -153,31 +183,26 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
             val t = tabLayout.getTabAt(i)
             val color = tabColors[i] ?: false
             val isCurrentTab = i == currentTabPosition
-            println("[refreshAllTabs] Tab $i: color=$color, isCurrent=$isCurrentTab")
             t?.let { updateTabColor(it, i, color, isCurrentTab) }
         }
     }
 
     private fun updateTabColor(tab: TabLayout.Tab, position: Int, isCompleted: Boolean, isCurrent: Boolean) {
         val color = if (isCompleted) {
-            ContextCompat.getColor(this, R.color.colorSuccess) // зелёный
+            ContextCompat.getColor(this, R.color.colorSuccess)
         } else {
-            ContextCompat.getColor(this, R.color.colorTextPrimary) // белый
+            ContextCompat.getColor(this, R.color.colorTextPrimary)
         }
-
-        println("[updateTabColor] position=$position, isCompleted=$isCompleted, isCurrent=$isCurrent, colorName=${if (isCompleted) "GREEN" else "WHITE"}")
 
         // Устанавливаем цвет и подчёркивание через custom view таба
         val customView = layoutInflater.inflate(R.layout.tab_custom, null)
         val textView = customView.findViewById<TextView>(R.id.tabText)
         val underline = customView.findViewById<View>(R.id.tabUnderline)
-        
+
         textView.text = "${position + 1}"
         textView.setTextColor(color)
-        
-        // Показываем подчёркивание только для текущего таба
         underline.visibility = if (isCurrent) View.VISIBLE else View.GONE
-        
+
         tab.customView = customView
     }
 
@@ -190,7 +215,6 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
         if (adapter != null && currentItem < adapter.itemCount - 1) {
             viewPager.setCurrentItem(currentItem + 1, true)
         } else {
-            // Это последняя карточка - завершаем урок
             Toast.makeText(this, "Урок завершён!", Toast.LENGTH_SHORT).show()
             finish()
         }

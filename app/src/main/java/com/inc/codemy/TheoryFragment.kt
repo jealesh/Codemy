@@ -22,7 +22,7 @@ class TheoryFragment : Fragment() {
         private const val ARG_LESSON_ID = "lesson_id"
         private const val ARG_USER_ID = "user_id"
 
-        fun newInstance(text: String, position: Int = -1, exerciseId: Long = 0L, lessonId: Long = 0L, userId: Long = 1L) =
+        fun newInstance(text: String, position: Int = -1, exerciseId: Long = -1L, lessonId: Long = -1L, userId: Long = -1L) =
             TheoryFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_TEXT, text)
@@ -43,9 +43,9 @@ class TheoryFragment : Fragment() {
 
         // Теория считается прочитанной, когда фрагмент показан
         val position = arguments?.getInt(ARG_POSITION) ?: -1
-        val exerciseId = arguments?.getLong(ARG_EXERCISE_ID) ?: 0L
-        val lessonId = arguments?.getLong(ARG_LESSON_ID) ?: 0L
-        val userId = arguments?.getLong(ARG_USER_ID) ?: 1L
+        val exerciseId = arguments?.getLong(ARG_EXERCISE_ID) ?: -1L
+        val lessonId = arguments?.getLong(ARG_LESSON_ID) ?: -1L
+        val userId = arguments?.getLong(ARG_USER_ID) ?: -1L
 
         if (position >= 0) {
             (activity as? LessonActivity)?.let { activity ->
@@ -64,6 +64,8 @@ class TheoryFragment : Fragment() {
     }
 
     private fun saveTheoryProgress(userId: Long, exerciseId: Long, lessonId: Long) {
+        if (userId <= 0 || exerciseId <= 0 || lessonId <= 0) return
+        
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 withContext(Dispatchers.IO) {

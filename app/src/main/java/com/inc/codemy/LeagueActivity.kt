@@ -19,11 +19,30 @@ class LeagueActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var textDaysLeft: TextView
     private lateinit var textLeagueName: TextView
-    private var userId: Long = 1L // TODO: брать из SharedPreferences
+    private var userId: Long = -1L
+
+    // Кэш для leaderboard (ключ: userId)
+    private data class LeaderboardCache(
+        val data: List<LeaderboardUserResponse>,
+        val daysRemaining: Int,
+        val userRank: LeaderboardUserResponse?,
+        val timestamp: Long
+    )
+    private var leaderboardCache: LeaderboardCache? = null
+    private val CACHE_TTL_MS = 30_000L // 30 секунд
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_league)
+
+        // Получаем userId из SharedPreferences
+        val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
+        userId = sharedPref.getLong("user_id", -1L)
+        if (userId == -1L) {
+            Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         listView = findViewById(R.id.leagueListView)
         textDaysLeft = findViewById(R.id.textDaysLeft)
@@ -33,6 +52,10 @@ class LeagueActivity : AppCompatActivity() {
         loadLeaderboard()
 
         // Нижняя навигация
+        setupBottomNavigation()
+    }
+
+    private fun setupBottomNavigation() {
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
         }
@@ -45,36 +68,28 @@ class LeagueActivity : AppCompatActivity() {
     }
 
     private fun loadLeaderboard() {
+        // Проверяем кэш
+        val cache = leaderboardCache
+        if (cache != null && System.currentTimeMillis() - cache.timestamp < CACHE_TTL_MS) {
+            updateLeaderboardUI(cache.data, cache.daysRemaining, cache.userRank)
+            return
+        }
+
         lifecycleScope.launch {
             try {
                 val leaderboard = withContext(Dispatchers.IO) {
                     ApiClient.apiService.getWeeklyLeaderboard(userId)
                 }
 
-                // Обновляем UI
-                textDaysLeft.text = "${leaderboard.daysRemaining} дн. до завершения недели"
-                textLeagueName.text = "Еженедельный рейтинг"
+                // Кэшируем результат
+                leaderboardCache = LeaderboardCache(
+                    data = leaderboard.users,
+                    daysRemaining = leaderboard.daysRemaining,
+                    userRank = leaderboard.userRank,
+                    timestamp = System.currentTimeMillis()
+                )
 
-                // Создаём список с выделением пользователя
-                val allUsers = leaderboard.users.toMutableList()
-                
-                // Если пользователя нет в топе, добавляем его в конец
-                val userRank = leaderboard.userRank
-                if (userRank != null && allUsers.none { it.userId == userRank.userId }) {
-                    allUsers.add(userRank)
-                }
-
-                // Преобразуем в LeagueUser
-                val leagueUsers = allUsers.map { response ->
-                    LeagueUser(
-                        name = response.fullName ?: response.username,
-                        weeklyXP = response.weeklyXp,
-                        rank = response.rank,
-                        isCurrentUser = response.userId == userId
-                    )
-                }
-
-                listView.adapter = LeagueAdapter(leagueUsers)
+                updateLeaderboardUI(leaderboard.users, leaderboard.daysRemaining, leaderboard.userRank)
 
             } catch (e: Exception) {
                 Toast.makeText(
@@ -82,10 +97,40 @@ class LeagueActivity : AppCompatActivity() {
                     "Ошибка загрузки рейтинга: ${e.localizedMessage}",
                     Toast.LENGTH_LONG
                 ).show()
-                
+
                 // Fallback на заглушку
                 textDaysLeft.text = "Ошибка загрузки"
             }
         }
+    }
+
+    private fun updateLeaderboardUI(
+        users: List<LeaderboardUserResponse>,
+        daysRemaining: Int,
+        userRank: LeaderboardUserResponse?
+    ) {
+        // Обновляем UI
+        textDaysLeft.text = "$daysRemaining дн. до завершения недели"
+        textLeagueName.text = "Еженедельный рейтинг"
+
+        // Создаём список с выделением пользователя
+        val allUsers = users.toMutableList()
+
+        // Если пользователя нет в топе, добавляем его в конец
+        if (userRank != null && allUsers.none { it.userId == userRank.userId }) {
+            allUsers.add(userRank)
+        }
+
+        // Преобразуем в LeagueUser
+        val leagueUsers = allUsers.map { response ->
+            LeagueUser(
+                name = response.fullName ?: response.username,
+                weeklyXP = response.weeklyXp,
+                rank = response.rank,
+                isCurrentUser = response.userId == userId
+            )
+        }
+
+        listView.adapter = LeagueAdapter(leagueUsers)
     }
 }

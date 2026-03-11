@@ -10,5 +10,7 @@ data class UserProfileResponse(
     val level: Int = 1,
     val weekly_xp: Int = 0,
     val last_reset_week: String? = null,
-    val updated_at: String? = null
+    val updated_at: String? = null,
+    val streak_current: Int = 0,
+    val streak_max: Int = 0
 )

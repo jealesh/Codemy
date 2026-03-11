@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.inc.codemy.models.UserProfileResponse
 import com.inc.codemy.network.ApiClient
+import com.inc.codemy.utils.UserDataCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +44,18 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         // Навигация
+        setupBottomNavigation()
+
+        // Выход
+        btnLogout.setOnClickListener {
+            UserDataCache.clear() // Очищаем кэш при выходе
+            getSharedPreferences("user_data", MODE_PRIVATE).edit().clear().apply()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun setupBottomNavigation() {
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
             finish()
@@ -54,13 +67,6 @@ class ProfileActivity : AppCompatActivity() {
 
         findViewById<LinearLayout>(R.id.navTrophy).setOnClickListener {
             startActivity(Intent(this, LeagueActivity::class.java))
-        }
-
-        // Выход
-        btnLogout.setOnClickListener {
-            getSharedPreferences("user_data", MODE_PRIVATE).edit().clear().apply()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
         }
     }
 
@@ -76,6 +82,13 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
+        // Проверяем кэш сначала
+        val cachedProfile = UserDataCache.getUserProfile(userId)
+        if (cachedProfile != null) {
+            updateProfileUI(cachedProfile)
+            return
+        }
+
         try {
             Log.d("ProfileActivity", "Запрос к серверу для userId = $userId")
             val profile = withContext(Dispatchers.IO) {
@@ -83,14 +96,8 @@ class ProfileActivity : AppCompatActivity() {
             }
             Log.d("ProfileActivity", "Получен ответ: $profile")
 
-            // Имя и username из users
-            profileName.text = profile.full_name ?: "Имя Пользователя"
-            profileLogin.text = profile.username ?: "username"
-
-            // Статистика из user_stats
-            profileXP.text = "${profile.total_xp} XP"
-            profileStreak.text = "0 дней" // заглушка, потом из базы
-            profileMaxStreak.text = "0 дней" // заглушка
+            UserDataCache.putUserProfile(userId, profile) // Кэшируем
+            updateProfileUI(profile)
 
         } catch (e: Exception) {
             Log.e("ProfileActivity", "Ошибка при загрузке профиля: ${e.message}", e)
@@ -98,5 +105,16 @@ class ProfileActivity : AppCompatActivity() {
             profileLogin.text = e.localizedMessage ?: "Неизвестная ошибка"
             profileXP.text = "⚡ — XP"
         }
+    }
+
+    private fun updateProfileUI(profile: UserProfileResponse) {
+        // Имя и username из users
+        profileName.text = profile.full_name ?: "Имя Пользователя"
+        profileLogin.text = profile.username ?: "username"
+
+        // Статистика из user_stats
+        profileXP.text = "${profile.total_xp} XP"
+        profileStreak.text = "${profile.streak_current} дн."
+        profileMaxStreak.text = "${profile.streak_max} дн."
     }
 }

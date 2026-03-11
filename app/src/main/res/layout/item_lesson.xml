@@ -43,33 +43,56 @@
             android:fontFamily="@font/nunitosans"
             android:textColor="@color/colorTextPrimary" />
 
-        <TextView
-            android:id="@+id/textLessonProgress"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0%"
-            android:textSize="14sp"
             android:background="@drawable/bg_text_transparent"
-            android:fontFamily="@font/rubik"
-            android:textColor="@color/colorAccent"
-            android:layout_marginTop="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <!-- Круговой индикатор прогресса -->
+            <ProgressBar
+                android:id="@+id/progressLessonCircle"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/bg_text_transparent"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/bg_progress_circle_lesson" />
+
+            <!-- Процент выполнения -->
+            <TextView
+                android:id="@+id/textLessonProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:background="@drawable/bg_text_transparent"
+                android:textSize="13sp"
+                android:fontFamily="@font/rubik"
+                android:textColor="@color/colorAccent"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Индикатор выполнения -->
+    <!-- Индикатор завершения (галочка для 100%) -->
     <LinearLayout
+        android:id="@+id/completionBadge"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@drawable/bg_progress_circle"
-        android:gravity="center">
+        android:background="@drawable/bg_success_circle"
+        android:gravity="center"
+        android:visibility="gone">
 
         <TextView
-            android:id="@+id/textLessonCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="✓"
             android:textSize="20sp"
             android:textColor="@color/colorBackground"
-            android:visibility="gone" />
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

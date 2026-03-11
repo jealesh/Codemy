@@ -18,6 +18,7 @@
     dependencies {
         implementation("org.jetbrains.exposed:exposed-core:0.52.0")
         implementation("org.jetbrains.exposed:exposed-jdbc:0.52.0")
+        implementation("com.zaxxer:HikariCP:5.1.0")  // Pool de connexions pour les performances
         implementation("com.typesafe:config:1.4.3")  // для ConfigFactory
         implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.52.0")
         implementation("com.typesafe:config:1.4.3")
