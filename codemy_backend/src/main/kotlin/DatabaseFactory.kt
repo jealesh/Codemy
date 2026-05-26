@@ -17,7 +17,7 @@ object DatabaseFactory {
             username = "codemy_app"
             password = "CodemySecure2026!"
             driverClassName = "org.postgresql.Driver"
-            
+
             // Настройки пула соединений
             minimumIdle = 5
             maximumPoolSize = 20
@@ -25,26 +25,26 @@ object DatabaseFactory {
             maxLifetime = 1800000
             connectionTimeout = 30000
             poolName = "CodemyHikariPool"
-            
+
             // Настройки производительности
             addDataSourceProperty("cachePrepStmts", "true")
             addDataSourceProperty("prepStmtCacheSize", "250")
             addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
             addDataSourceProperty("useServerPrepStmts", "true")
         }
-        
+
         dataSource = HikariDataSource(config)
-        
+
         val database = Database.connect(dataSource)
 
         transaction(database) {
             // Самое важное — устанавливаем схему public для всего этого соединения
             exec("SET search_path TO app;")
 
-            // Теперь создаём таблицы
+            // Теперь создаём таблицы (8 таблиц)
             SchemaUtils.createMissingTablesAndColumns(
                 Users, Courses, Lessons, Exercise, ExerciseProgress,
-                UserLessonProgress, UserDailyActivity, UserStats, Achievements, UserAchievements
+                UserLessonProgress, UserDailyActivity, UserStats
             )
 
             // ALTER дефолтных значений
@@ -57,11 +57,27 @@ object DatabaseFactory {
                 ALTER TABLE courses ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP;
                 ALTER TABLE user_lesson_progress ALTER COLUMN last_attempt_at SET DEFAULT CURRENT_TIMESTAMP;
                 ALTER TABLE user_stats ALTER COLUMN updated_at SET DEFAULT CURRENT_TIMESTAMP;
-                ALTER TABLE user_achievements ALTER COLUMN unlocked_at SET DEFAULT CURRENT_TIMESTAMP;
             EXCEPTION WHEN others THEN
                 -- если колонка уже имеет дефолт — просто игнорируем
             END $$;
         """.trimIndent()
+            )
+
+            // Добавляем поле avatar_url, если оно отсутствует
+            exec(
+                """
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_schema = 'app' 
+                        AND table_name = 'users' 
+                        AND column_name = 'avatar_url'
+                    ) THEN
+                        ALTER TABLE app.users ADD COLUMN avatar_url VARCHAR(255) NULL;
+                    END IF;
+                END $$;
+            """.trimIndent()
             )
 
             println("PostgreSQL is connected with HikariCP connection pool.")
@@ -71,7 +87,7 @@ object DatabaseFactory {
     fun getConnection(): Connection {
         return dataSource.connection
     }
-    
+
     fun close() {
         if (::dataSource.isInitialized) {
             dataSource.close()

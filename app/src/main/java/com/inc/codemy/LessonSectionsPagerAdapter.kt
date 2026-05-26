@@ -43,9 +43,10 @@ class LessonSectionsPagerAdapter(
         val exerciseId = section.id ?: 0L
         // Проверяем, выполнено ли упражнение (только для задач, не для теории)
         val isCompleted = completedExerciseIds.contains(exerciseId)
+        val xpReward = section.xpReward
 
         return when (section.type) {
-            "theory" -> TheoryFragment.newInstance(section.text, position, exerciseId, lessonId, userId)
+            "theory" -> TheoryFragment.newInstance(section.text, position, exerciseId, lessonId, userId, isCompleted)
             "oral_code" -> OralCodeFragment.newInstance(
                 section.text,
                 section.correctAnswer,
@@ -53,7 +54,8 @@ class LessonSectionsPagerAdapter(
                 exerciseId,
                 lessonId,
                 position,
-                isCompleted
+                isCompleted,
+                xpReward
             )
             "programming" -> ProgrammingFragment.newInstance(
                 section.text,
@@ -64,7 +66,8 @@ class LessonSectionsPagerAdapter(
                 exerciseId,
                 lessonId,
                 position,
-                isCompleted
+                isCompleted,
+                xpReward
             )
             "matching" -> MatchingFragment.newInstance(
                 section.text,
@@ -74,9 +77,10 @@ class LessonSectionsPagerAdapter(
                 exerciseId,
                 lessonId,
                 position,
-                isCompleted
+                isCompleted,
+                xpReward
             )
-            else -> TheoryFragment.newInstance("Неизвестный тип: ${section.type}", position, exerciseId, lessonId, userId)
+            else -> TheoryFragment.newInstance("Неизвестный тип: ${section.type}", position, exerciseId, lessonId, userId, isCompleted)
         }
     }
 }

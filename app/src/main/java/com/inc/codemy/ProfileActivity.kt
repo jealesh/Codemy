@@ -82,13 +82,7 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Проверяем кэш сначала
-        val cachedProfile = UserDataCache.getUserProfile(userId)
-        if (cachedProfile != null) {
-            updateProfileUI(cachedProfile)
-            return
-        }
-
+        // Всегда загружаем свежие данные с сервера для профиля
         try {
             Log.d("ProfileActivity", "Запрос к серверу для userId = $userId")
             val profile = withContext(Dispatchers.IO) {
@@ -101,9 +95,15 @@ class ProfileActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             Log.e("ProfileActivity", "Ошибка при загрузке профиля: ${e.message}", e)
-            profileName.text = "Ошибка загрузки"
-            profileLogin.text = e.localizedMessage ?: "Неизвестная ошибка"
-            profileXP.text = "⚡ — XP"
+            // Пробуем загрузить из кэша при ошибке
+            val cachedProfile = UserDataCache.getUserProfile(userId)
+            if (cachedProfile != null) {
+                updateProfileUI(cachedProfile)
+            } else {
+                profileName.text = "Ошибка загрузки"
+                profileLogin.text = e.localizedMessage ?: "Неизвестная ошибка"
+                profileXP.text = "⚡ — XP"
+            }
         }
     }
 

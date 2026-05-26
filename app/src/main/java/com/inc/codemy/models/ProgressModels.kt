@@ -19,7 +19,9 @@ data class ExerciseCompletionResponse(
     val totalXp: Long,
     val dailyXp: Int,
     val dailyGoal: Int,
-    val alreadyCompleted: Boolean = false
+    val alreadyCompleted: Boolean = false,
+    val streakCurrent: Int = 0,
+    val streakMax: Int = 0
 )
 
 @Serializable

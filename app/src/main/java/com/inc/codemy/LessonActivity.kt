@@ -124,10 +124,35 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
 
                 // Связываем TabLayout с ViewPager (номера карточек)
                 TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                    tab.text = "${position + 1}"
+                    // Создаём custom view для таба
+                    val customView = layoutInflater.inflate(R.layout.tab_custom, tabLayout, false)
+                    val textView = customView.findViewById<TextView>(R.id.tabText)
+                    val underline = customView.findViewById<View>(R.id.tabUnderline)
+
+                    textView.text = "${position + 1}"
+                    
                     val isCompleted = tabColors[position] ?: false
                     val isCurrent = position == currentTabPosition
-                    updateTabColor(tab, position, isCompleted, isCurrent)
+                    
+                    val textColor = if (isCompleted) {
+                        ContextCompat.getColor(this@LessonActivity, R.color.colorSuccess)
+                    } else {
+                        ContextCompat.getColor(this@LessonActivity, R.color.colorTextPrimary)
+                    }
+                    
+                    textView.setTextColor(textColor)
+                    
+                    // Подчёркивание: зелёное если выполнено, белое если нет
+                    val underlineColor = if (isCompleted) {
+                        ContextCompat.getColor(this@LessonActivity, R.color.colorSuccess)
+                    } else {
+                        ContextCompat.getColor(this@LessonActivity, R.color.colorTextPrimary)
+                    }
+                    
+                    underline.visibility = if (isCurrent) View.VISIBLE else View.GONE
+                    underline.setBackgroundColor(underlineColor)
+                    
+                    tab.customView = customView
                 }.attach()
 
                 // Добавляем listener для восстановления цвета при переключении
@@ -180,30 +205,33 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
      */
     private fun refreshAllTabs() {
         for (i in 0 until tabLayout.tabCount) {
-            val t = tabLayout.getTabAt(i)
-            val color = tabColors[i] ?: false
+            val tab = tabLayout.getTabAt(i)
+            val customView = tab?.customView ?: continue
+            
+            val isCompleted = tabColors[i] ?: false
             val isCurrentTab = i == currentTabPosition
-            t?.let { updateTabColor(it, i, color, isCurrentTab) }
+            
+            val textView = customView.findViewById<TextView>(R.id.tabText)
+            val underline = customView.findViewById<View>(R.id.tabUnderline)
+            
+            val textColor = if (isCompleted) {
+                ContextCompat.getColor(this@LessonActivity, R.color.colorSuccess)
+            } else {
+                ContextCompat.getColor(this@LessonActivity, R.color.colorTextPrimary)
+            }
+            
+            textView.setTextColor(textColor)
+            
+            // Подчёркивание: зелёное если выполнено, белое если нет
+            val underlineColor = if (isCompleted) {
+                ContextCompat.getColor(this@LessonActivity, R.color.colorSuccess)
+            } else {
+                ContextCompat.getColor(this@LessonActivity, R.color.colorTextPrimary)
+            }
+            
+            underline.visibility = if (isCurrentTab) View.VISIBLE else View.GONE
+            underline.setBackgroundColor(underlineColor)
         }
-    }
-
-    private fun updateTabColor(tab: TabLayout.Tab, position: Int, isCompleted: Boolean, isCurrent: Boolean) {
-        val color = if (isCompleted) {
-            ContextCompat.getColor(this, R.color.colorSuccess)
-        } else {
-            ContextCompat.getColor(this, R.color.colorTextPrimary)
-        }
-
-        // Устанавливаем цвет и подчёркивание через custom view таба
-        val customView = layoutInflater.inflate(R.layout.tab_custom, null)
-        val textView = customView.findViewById<TextView>(R.id.tabText)
-        val underline = customView.findViewById<View>(R.id.tabUnderline)
-
-        textView.text = "${position + 1}"
-        textView.setTextColor(color)
-        underline.visibility = if (isCurrent) View.VISIBLE else View.GONE
-
-        tab.customView = customView
     }
 
     /**

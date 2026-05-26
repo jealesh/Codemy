@@ -29,8 +29,8 @@ class ProgrammingFragment : Fragment() {
         private const val ARG_EXERCISE_ID = "exercise_id"
         private const val ARG_LESSON_ID = "lesson_id"
         private const val ARG_POSITION = "position"
+        private const val ARG_XP_REWARD = "xp_reward"
         const val EXERCISE_TYPE = "programming"
-        const val XP_REWARD = 5
 
         fun newInstance(
             question: String,
@@ -41,7 +41,8 @@ class ProgrammingFragment : Fragment() {
             exerciseId: Long = -1L,
             lessonId: Long = -1L,
             position: Int = -1,
-            isCompleted: Boolean = false
+            isCompleted: Boolean = false,
+            xpReward: Int? = null
         ): ProgrammingFragment {
             val fragment = ProgrammingFragment()
             fragment.arguments = Bundle().apply {
@@ -54,6 +55,7 @@ class ProgrammingFragment : Fragment() {
                 putLong(ARG_LESSON_ID, lessonId)
                 putInt(ARG_POSITION, position)
                 putBoolean("isCompleted", isCompleted)
+                xpReward?.let { putInt(ARG_XP_REWARD, it) }
             }
             return fragment
         }
@@ -76,6 +78,7 @@ class ProgrammingFragment : Fragment() {
         val expectedOutput = arguments?.getString(ARG_EXPECTED_OUTPUT) ?: ""
         val position = arguments?.getInt(ARG_POSITION) ?: -1
         val isCompleted = arguments?.getBoolean("isCompleted") ?: false
+        val xpReward = arguments?.getInt(ARG_XP_REWARD)
 
         view.findViewById<TextView>(R.id.textQuestion)?.text = question
 
@@ -90,6 +93,14 @@ class ProgrammingFragment : Fragment() {
         val textExpectedOutput = view.findViewById<TextView>(R.id.textExpectedOutput)
         val textXpReward = view.findViewById<TextView>(R.id.textXpReward)
         val webView = view.findViewById<WebView>(R.id.webViewPyodide)
+
+        // Отображаем XP награду из БД
+        xpReward?.let {
+            textXpReward.visibility = View.VISIBLE
+            textXpReward.text = "+$it XP"
+        } ?: run {
+            textXpReward.visibility = View.GONE
+        }
 
         // Показываем ожидаемый вывод если есть
         if (expectedOutput.isNotEmpty()) {

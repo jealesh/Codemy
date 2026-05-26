@@ -10,5 +10,6 @@ data class LessonSection(
     val correctAnswer: String? = null,  // правильный ответ (для задач)
     val options: List<String>? = null,   // варианты для matching
     val stdin: String? = null,          // входные данные для programming
-    val expectedOutput: String? = null  // ожидаемый вывод для programming
+    val expectedOutput: String? = null, // ожидаемый вывод для programming
+    val xpReward: Int? = null           // XP награда за упражнение (из БД)
 )

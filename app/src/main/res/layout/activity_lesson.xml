@@ -75,12 +75,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:tabMode="scrollable"
-        app:tabGravity="fill"
+        app:tabGravity="start"
         app:tabIndicatorColor="@color/colorAccent"
         app:tabSelectedTextColor="@color/colorTextPrimary"
         app:tabTextColor="#80FFFFFF"
         app:tabIndicatorHeight="4dp"
         app:tabBackground="@android:color/transparent"
-        android:layout_marginBottom="8dp" />
+        app:tabMinWidth="48dp"
+        app:tabMaxWidth="64dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_text_transparent" />
 
 </LinearLayout>

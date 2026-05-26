@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tasklist)",
+      "Bash(findstr *)",
+      "Bash(netstat *)",
+      "Bash(taskkill *)",
+      "Bash(timeout *)",
+      "Bash(.\\gradlew.bat *)",
+      "Bash(curl *)",
+      "Bash(docker ps *)",
+      "Bash(psql *)"
+    ]
+  }
+}

@@ -100,6 +100,14 @@ class MainScreenActivity : AppCompatActivity() {
         loadDailyGoal()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Обновляем ежедневную цель при возврате (например, после урока)
+        loadDailyGoal()
+        // Обновляем прогресс уроков при возврате
+        loadLessonsForCourse(selectedCourseId)
+    }
+
     private fun setupBottomNavigation() {
         findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))

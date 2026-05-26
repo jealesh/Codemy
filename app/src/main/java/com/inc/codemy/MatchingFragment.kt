@@ -24,8 +24,8 @@ class MatchingFragment : Fragment() {
         private const val ARG_EXERCISE_ID = "exercise_id"
         private const val ARG_LESSON_ID = "lesson_id"
         private const val ARG_POSITION = "position"
+        private const val ARG_XP_REWARD = "xp_reward"
         const val EXERCISE_TYPE = "matching"
-        const val XP_REWARD = 2
 
         fun newInstance(
             question: String,
@@ -35,7 +35,8 @@ class MatchingFragment : Fragment() {
             exerciseId: Long = -1L,
             lessonId: Long = -1L,
             position: Int = -1,
-            isCompleted: Boolean = false
+            isCompleted: Boolean = false,
+            xpReward: Int? = null
         ) = MatchingFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_QUESTION, question)
@@ -46,6 +47,7 @@ class MatchingFragment : Fragment() {
                 putLong(ARG_LESSON_ID, lessonId)
                 putInt(ARG_POSITION, position)
                 putBoolean("isCompleted", isCompleted)
+                xpReward?.let { putInt(ARG_XP_REWARD, it) }
             }
         }
     }
@@ -66,6 +68,7 @@ class MatchingFragment : Fragment() {
         val correct = arguments?.getString(ARG_CORRECT) ?: ""
         val position = arguments?.getInt(ARG_POSITION) ?: -1
         val isCompleted = arguments?.getBoolean("isCompleted") ?: false
+        val xpReward = arguments?.getInt(ARG_XP_REWARD)
 
         view.findViewById<TextView>(R.id.textQuestion).text = question
 
@@ -75,6 +78,14 @@ class MatchingFragment : Fragment() {
         val btnRetry = view.findViewById<Button>(R.id.btnRetry)
         val textResult = view.findViewById<TextView>(R.id.textResult)
         val textXpReward = view.findViewById<TextView>(R.id.textXpReward)
+
+        // Отображаем XP награду из БД
+        xpReward?.let {
+            textXpReward.visibility = View.VISIBLE
+            textXpReward.text = "+$it XP"
+        } ?: run {
+            textXpReward.visibility = View.GONE
+        }
 
         // Если упражнение уже выполнено - показываем состояние завершения
         // Но позволяем решить повторно

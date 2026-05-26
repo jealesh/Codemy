@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
         <TextView
             android:id="@+id/textTheory"
@@ -19,7 +20,20 @@
             android:textColor="@color/colorTextPrimary"
             android:textSize="16sp"
             android:fontFamily="@font/rubik"
-            android:lineSpacingExtra="8dp" />
+            android:lineSpacingExtra="8dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Button to proceed to next step -->
+        <Button
+            android:id="@+id/btnNextTheory"
+            style="@style/CodemyButton.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Перейти к следующему шагу"
+            android:stateListAnimator="@null"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

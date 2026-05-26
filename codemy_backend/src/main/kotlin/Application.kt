@@ -51,6 +51,7 @@ data class LoginResponse(
 data class UserProfileResponse(
     val full_name: String = "",
     val username: String = "",
+    val avatar_url: String? = null,
     val total_xp: Long = 0,
     val level: Int = 1,
     val weekly_xp: Int = 0,
@@ -64,8 +65,6 @@ data class UserProfileResponse(
 data class CourseResponse(
     val id: Long,
     val name: String,
-    val description: String?,
-    val iconUrl: String?,
     val isActive: Boolean
 )
 
@@ -74,8 +73,6 @@ data class LessonResponse(
     val id: Long,
     val title: String,
     val orderIndex: Int,
-    val estimatedMinutes: Int,
-    val xpReward: Int,
     val progress: Int?,
     val completed: Boolean,
     val content: List<LessonSection> = emptyList()
@@ -114,35 +111,21 @@ data class LeaderboardResponse(
 // ────────────────────────────────────────────────
 
 /**
- * XP награды за типы упражнений
- */
-object XPRewards {
-    const val ORAL_CODE = 3        // Устная задача
-    const val MATCHING = 2         // Соотношение
-    const val PROGRAMMING = 5      // Программирование
-    const val THEORY = 0           // Теория (без XP)
-}
-
-/**
  * Обновляет стрик пользователя при завершении упражнения
- * Вызывается при каждом завершённом упражнении, но обновляется только если сегодня ещё не обновлялся
  * @return Pair(currentStreak, maxStreak)
  */
 fun updateStreak(conn: Connection, userId: Long): Pair<Int, Int> {
     val today = java.time.LocalDate.now()
     val yesterday = today.minusDays(1)
-    
     var currentStreak = 0
     var maxStreak = 0
-    
-    // Получаем текущие значения стриков и последнюю активность
+
     val statsStmt = conn.prepareStatement("""
-        SELECT streak_current, streak_max, last_activity_date FROM app.user_stats
-        WHERE user_id = ?
+        SELECT streak_current, streak_max, last_activity_date FROM app.user_stats WHERE user_id = ?
     """.trimIndent())
     statsStmt.setLong(1, userId)
     val statsRs = statsStmt.executeQuery()
-    
+
     var lastActivityDate: java.time.LocalDate? = null
     var statsExists = false
     if (statsRs.next()) {
@@ -150,70 +133,39 @@ fun updateStreak(conn: Connection, userId: Long): Pair<Int, Int> {
         currentStreak = statsRs.getInt("streak_current")
         maxStreak = statsRs.getInt("streak_max")
         val lastDate = statsRs.getDate("last_activity_date")
-        if (lastDate != null) {
-            lastActivityDate = lastDate.toLocalDate()
-        }
-    } else {
+        if (lastDate != null) lastActivityDate = lastDate.toLocalDate()
     }
 
-    // Определяем, нужно ли обновлять стрик
     when {
-        lastActivityDate == null && !statsExists -> {
-            // Первая активность вообще - начинаем стрик с 1
-            currentStreak = 1
-            maxStreak = 1
-        }
-        lastActivityDate == null && statsExists -> {
-            // Статистика есть, но last_activity_date не установлен - первая активность
-            currentStreak = 1
-            if (maxStreak < 1) maxStreak = 1
-        }
-        lastActivityDate == today -> {
-            // Уже была активность сегодня - стрик НЕ обновляем, просто возвращаем текущий
-            return Pair(currentStreak, maxStreak)
-        }
+        lastActivityDate == null && !statsExists -> { currentStreak = 1; maxStreak = 1 }
+        lastActivityDate == null && statsExists -> { currentStreak = 1; if (maxStreak < 1) maxStreak = 1 }
+        lastActivityDate == today -> return Pair(currentStreak, maxStreak)
         lastActivityDate == yesterday -> {
-            // Активность была вчера - продолжаем стрик
             currentStreak++
-            if (currentStreak > maxStreak) {
-                maxStreak = currentStreak
-            }
+            if (currentStreak > maxStreak) maxStreak = currentStreak
         }
-        else -> {
-            // Пропустили день или больше - сбрасываем стрик к 1
-            currentStreak = 1
-            if (maxStreak < 1) maxStreak = 1
-        }
+        else -> { currentStreak = 1; if (maxStreak < 1) maxStreak = 1 }
     }
 
-    // Обновляем или создаём запись в базе
     if (statsExists) {
-        // UPDATE существующей записи
         conn.prepareStatement("""
-            UPDATE app.user_stats
-            SET streak_current = ?, streak_max = ?, last_activity_date = ?, updated_at = CURRENT_TIMESTAMP
+            UPDATE app.user_stats SET streak_current = ?, streak_max = ?, last_activity_date = ?, updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
         """.trimIndent()).use { stmt ->
-            stmt.setInt(1, currentStreak)
-            stmt.setInt(2, maxStreak)
-            stmt.setDate(3, java.sql.Date.valueOf(today))
-            stmt.setLong(4, userId)
+            stmt.setInt(1, currentStreak); stmt.setInt(2, maxStreak)
+            stmt.setDate(3, java.sql.Date.valueOf(today)); stmt.setLong(4, userId)
             stmt.executeUpdate()
         }
     } else {
-        // INSERT новой записи
         conn.prepareStatement("""
             INSERT INTO app.user_stats (user_id, streak_current, streak_max, last_activity_date, total_xp, weekly_xp, updated_at)
             VALUES (?, ?, ?, ?, 0, 0, CURRENT_TIMESTAMP)
         """.trimIndent()).use { stmt ->
-            stmt.setLong(1, userId)
-            stmt.setInt(2, currentStreak)
-            stmt.setInt(3, maxStreak)
+            stmt.setLong(1, userId); stmt.setInt(2, currentStreak); stmt.setInt(3, maxStreak)
             stmt.setDate(4, java.sql.Date.valueOf(today))
             stmt.executeUpdate()
         }
     }
-
     return Pair(currentStreak, maxStreak)
 }
 
@@ -241,7 +193,9 @@ data class ExerciseCompletionResponse(
     val totalXp: Long,
     val dailyXp: Int,
     val dailyGoal: Int,
-    val alreadyCompleted: Boolean = false
+    val alreadyCompleted: Boolean = false,
+    val streakCurrent: Int = 0,
+    val streakMax: Int = 0
 )
 
 @Serializable
@@ -315,6 +269,7 @@ fun Application.module() {
         json(Json {
             ignoreUnknownKeys = true
             prettyPrint = true
+            encodeDefaults = true
         })
     }
 
@@ -427,7 +382,7 @@ fun Application.module() {
             try {
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                        SELECT u.full_name, u.username, us.total_xp, us.level, us.weekly_xp,
+                        SELECT u.full_name, u.username, u.avatar_url, us.total_xp, us.level, us.weekly_xp,
                                us.last_reset_week, us.updated_at, us.streak_current, us.streak_max
                         FROM app.users u
                         LEFT JOIN app.user_stats us ON u.id = us.user_id
@@ -444,6 +399,7 @@ fun Application.module() {
                     val response = UserProfileResponse(
                         full_name = rs.getString("full_name") ?: "",
                         username = rs.getString("username") ?: "",
+                        avatar_url = rs.getString("avatar_url"),
                         total_xp = rs.getLong("total_xp"),
                         level = rs.getInt("level"),
                         weekly_xp = rs.getInt("weekly_xp"),
@@ -471,8 +427,8 @@ fun Application.module() {
             try {
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                        SELECT id, name, description, icon_url, is_active 
-                        FROM app.courses 
+                        SELECT id, name, is_active
+                        FROM app.courses
                         WHERE is_active = true
                         ORDER BY name
                     """.trimIndent())
@@ -485,8 +441,6 @@ fun Application.module() {
                             CourseResponse(
                                 id = rs.getLong("id"),
                                 name = rs.getString("name"),
-                                description = rs.getString("description"),
-                                iconUrl = rs.getString("icon_url"),
                                 isActive = rs.getBoolean("is_active")
                             )
                         )
@@ -512,10 +466,10 @@ fun Application.module() {
             try {
                 DatabaseFactory.getConnection().use { conn ->
                     val stmt = conn.prepareStatement("""
-                        SELECT l.id, l.title, l.order_index, l.estimated_minutes, l.xp_reward,
+                        SELECT l.id, l.title, l.order_index,
                                ulp.progress, ulp.completed_at
                         FROM app.lessons l
-                        LEFT JOIN app.user_lesson_progress ulp 
+                        LEFT JOIN app.user_lesson_progress ulp
                             ON l.id = ulp.lesson_id AND ulp.user_id = ?
                         WHERE l.course_id = ?
                         ORDER BY l.order_index ASC
@@ -531,25 +485,23 @@ fun Application.module() {
                         val lessonId = rs.getLong("id")
                         val title = rs.getString("title")
                         val orderIndex = rs.getInt("order_index")
-                        val estimatedMinutes = rs.getInt("estimated_minutes")
-                        val xpReward = rs.getInt("xp_reward")
-                        
+
                         // Сначала читаем progress и проверяем NULL
                         val progressValue = rs.getInt("progress")
                         val hasProgress = !rs.wasNull()
-                        
+
                         val completedAt = rs.getTimestamp("completed_at")
-                        
+
                         // Если нет записи в user_lesson_progress, вычисляем прогресс динамически
                         val finalProgress = if (hasProgress && progressValue > 0) {
                             progressValue
                         } else {
                             // Вычисляем прогресс на основе завершённых упражнений
                             val progressStmt = conn.prepareStatement("""
-                                SELECT 
+                                SELECT
                                     COUNT(CASE WHEN ep.is_completed = true THEN 1 END) * 100 / NULLIF(COUNT(*), 0) as progress
                                 FROM app.exercise e
-                                LEFT JOIN app.exercise_progress ep 
+                                LEFT JOIN app.exercise_progress ep
                                     ON e.id = ep.exercise_id AND ep.user_id = ?
                                 WHERE e.lesson_id = ?
                             """.trimIndent())
@@ -562,14 +514,12 @@ fun Application.module() {
                                 0
                             }
                         }
-                        
+
                         lessons.add(
                             LessonResponse(
                                 id = lessonId,
                                 title = title,
                                 orderIndex = orderIndex,
-                                estimatedMinutes = estimatedMinutes,
-                                xpReward = xpReward,
                                 progress = finalProgress,
                                 completed = completedAt != null
                             )
@@ -597,7 +547,7 @@ fun Application.module() {
                 DatabaseFactory.getConnection().use { conn ->
                     // Урок
                     val lessonStmt = conn.prepareStatement("""
-                SELECT l.id, l.title, l.order_index, l.estimated_minutes, l.xp_reward,
+                SELECT l.id, l.title, l.order_index,
                        ulp.progress, (ulp.completed_at IS NOT NULL) AS completed
                 FROM app.lessons l
                 LEFT JOIN app.user_lesson_progress ulp ON l.id = ulp.lesson_id AND ulp.user_id = ?
@@ -615,10 +565,10 @@ fun Application.module() {
 
                     // Упражнения
                     val exerciseStmt = conn.prepareStatement("""
-                SELECT id, "order", type, text, correct_answer, options, xp_reward
+                SELECT id, order_index, type, text, correct_answer, options, xp_reward
                 FROM app.exercise
                 WHERE lesson_id = ?
-                ORDER BY "order" ASC
+                ORDER BY order_index ASC
             """.trimIndent())
 
                     exerciseStmt.setLong(1, lessonId)
@@ -644,8 +594,6 @@ fun Application.module() {
                         id = lessonRs.getLong("id"),
                         title = lessonRs.getString("title"),
                         orderIndex = lessonRs.getInt("order_index"),
-                        estimatedMinutes = lessonRs.getInt("estimated_minutes"),
-                        xpReward = lessonRs.getInt("xp_reward"),
                         progress = if (lessonRs.wasNull()) 0 else lessonRs.getInt("progress"),
                         completed = lessonRs.getBoolean("completed"),
                         content = content
@@ -673,7 +621,7 @@ fun Application.module() {
                     val nextMonday = monday.plusWeeks(1)
                     val daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(now.toLocalDate(), nextMonday).toInt()
 
-                    // Топ пользователей за текущую неделю
+                    // Топ пользователей за текущую неделю (на основе weekly_xp из user_stats)
                     val stmt = conn.prepareStatement("""
                         SELECT u.id, u.username, u.full_name, COALESCE(us.weekly_xp, 0) as weekly_xp,
                                u.avatar_url,
@@ -742,8 +690,7 @@ fun Application.module() {
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Add XP endpoint
+
         post("/user-stats/add-xp") {
             val userId = call.request.queryParameters["userId"]?.toLongOrNull()
                 ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "userId required"))
@@ -753,7 +700,6 @@ fun Application.module() {
 
             try {
                 DatabaseFactory.getConnection().use { conn ->
-                    // Обновляем total_xp и weekly_xp
                     conn.prepareStatement("""
                         UPDATE app.user_stats
                         SET total_xp = total_xp + ?,
@@ -776,15 +722,21 @@ fun Application.module() {
             }
         }
 
-        // ────────────────────────────────────────────────
-        // Завершение упражнения с начислением XP (синхронизация)
-        // ────────────────────────────────────────────────
         post("/exercise/complete") {
             try {
                 val request = call.receive<ExerciseCompletionRequest>()
 
                 DatabaseFactory.getConnection().use { conn ->
-                    // Проверяем, не завершено ли уже это упражнение
+                    val xpRewardStmt = conn.prepareStatement("""
+                        SELECT xp_reward FROM app.exercise WHERE id = ?
+                    """.trimIndent())
+                    xpRewardStmt.setLong(1, request.exerciseId)
+                    val xpRewardRs = xpRewardStmt.executeQuery()
+                    var xpReward = 0
+                    if (xpRewardRs.next()) {
+                        xpReward = xpRewardRs.getInt("xp_reward")
+                    }
+
                     val checkStmt = conn.prepareStatement("""
                         SELECT is_completed, xp_earned FROM app.exercise_progress
                         WHERE user_id = ? AND exercise_id = ?
@@ -794,7 +746,6 @@ fun Application.module() {
                     val checkRs = checkStmt.executeQuery()
 
                     if (checkRs.next() && checkRs.getBoolean("is_completed")) {
-                        // Уже завершено - XP не начисляем повторно
                         call.respond(
                             HttpStatusCode.OK,
                             ExerciseCompletionResponse(
@@ -810,18 +761,8 @@ fun Application.module() {
                         return@post
                     }
 
-                    // Определяем XP награду по типу упражнения
-                    val xpReward = when (request.exerciseType.lowercase()) {
-                        "oral_code" -> XPRewards.ORAL_CODE      // 3 XP
-                        "matching" -> XPRewards.MATCHING        // 2 XP
-                        "programming" -> XPRewards.PROGRAMMING  // 5 XP
-                        else -> 0
-                    }
-
-                    // Если ответ неверный - просто записываем попытку без XP
                     val xpToEarn = if (request.isCorrect) xpReward else 0
 
-                    // Вставляем или обновляем прогресс упражнения
                     conn.prepareStatement("""
                         INSERT INTO app.exercise_progress (user_id, exercise_id, lesson_id, is_completed, xp_earned, attempts_count, last_attempt_at, completed_at)
                         VALUES (?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, ${if (request.isCorrect) "CURRENT_TIMESTAMP" else "NULL"})
@@ -841,14 +782,15 @@ fun Application.module() {
                         stmt.executeUpdate()
                     }
 
-                    // Начисляем XP в user_stats только если ответ правильный
                     var totalXp: Long = 0
                     var currentStreak = 0
                     var maxStreak = 0
-                    var dailyGoal = 20  // значение по умолчанию
+                    var dailyGoal = 20
+                    var dailyXp = 0
 
                     if (request.isCorrect && xpReward > 0) {
-                        // Получаем daily_goal из базы (если запись есть)
+                        val today = java.time.LocalDate.now()
+
                         val goalStmt = conn.prepareStatement("""
                             SELECT daily_goal FROM app.user_stats WHERE user_id = ?
                         """.trimIndent())
@@ -858,7 +800,6 @@ fun Application.module() {
                             dailyGoal = goalRs.getInt("daily_goal")
                         }
 
-                        // Используем INSERT ... ON CONFLICT DO UPDATE для XP
                         conn.prepareStatement("""
                             INSERT INTO app.user_stats (user_id, total_xp, weekly_xp, daily_goal, updated_at)
                             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -877,7 +818,6 @@ fun Application.module() {
                             stmt.executeUpdate()
                         }
 
-                        // Получаем обновлённый total_xp
                         val statsStmt = conn.prepareStatement("""
                             SELECT total_xp FROM app.user_stats WHERE user_id = ?
                         """.trimIndent())
@@ -887,19 +827,13 @@ fun Application.module() {
                             totalXp = statsRs.getLong("total_xp")
                         }
 
-                        // Обновляем стрик
-                        val (streak, max) = updateStreak(conn, request.userId)
-                        currentStreak = streak
-                        maxStreak = max
-                    }
+                        val streak = updateStreak(conn, request.userId)
+                        currentStreak = streak.first
+                        maxStreak = streak.second
 
-                    // Обновляем user_daily_activity
-                    val today = java.time.LocalDate.now()
-                    var dailyXp = 0
-                    if (request.isCorrect && xpReward > 0) {
                         conn.prepareStatement("""
-                            INSERT INTO app.user_daily_activity (user_id, date, xp_earned, exercises_completed, lessons_completed, daily_goal)
-                            VALUES (?, ?, ?, 1, 0, ?)
+                            INSERT INTO app.user_daily_activity (user_id, date, xp_earned, exercises_completed, lessons_completed, streak_active, daily_goal)
+                            VALUES (?, ?, ?, 1, 0, ?, ?)
                             ON CONFLICT (user_id, date) DO UPDATE SET
                                 xp_earned = user_daily_activity.xp_earned + ?,
                                 exercises_completed = user_daily_activity.exercises_completed + 1,
@@ -908,14 +842,14 @@ fun Application.module() {
                             stmt.setLong(1, request.userId)
                             stmt.setDate(2, java.sql.Date.valueOf(today))
                             stmt.setInt(3, xpReward)
-                            stmt.setInt(4, dailyGoal)  // daily_goal для INSERT
-                            stmt.setInt(5, xpReward)    // xp_earned для UPDATE
+                            stmt.setInt(4, currentStreak)
+                            stmt.setInt(5, dailyGoal)
+                            stmt.setInt(6, xpReward)
                             stmt.executeUpdate()
                         }
 
-                        // Получаем дневной прогресс
                         val dailyStmt = conn.prepareStatement("""
-                            SELECT xp_earned, daily_goal FROM app.user_daily_activity
+                            SELECT xp_earned FROM app.user_daily_activity
                             WHERE user_id = ? AND date = ?
                         """.trimIndent())
                         dailyStmt.setLong(1, request.userId)
@@ -923,46 +857,40 @@ fun Application.module() {
                         val dailyRs = dailyStmt.executeQuery()
                         if (dailyRs.next()) {
                             dailyXp = dailyRs.getInt("xp_earned")
-                            dailyGoal = dailyRs.getInt("daily_goal")
                         }
-                    }
 
-                    // === ОБНОВЛЯЕМ ПРОГРЕСС УРОКА ===
-                    // Вычисляем процент завершённых упражнений в уроке
-                    if (request.isCorrect) {
+                        val exerciseStatsStmt = conn.prepareStatement("""
+                            SELECT
+                                COUNT(*) as total_exercises,
+                                COUNT(CASE WHEN ep.is_completed = true THEN 1 END) as completed_exercises
+                            FROM app.exercise e
+                            LEFT JOIN app.exercise_progress ep
+                                ON e.id = ep.exercise_id AND ep.user_id = ?
+                            WHERE e.lesson_id = ?
+                        """.trimIndent())
+                        exerciseStatsStmt.setLong(1, request.userId)
+                        exerciseStatsStmt.setLong(2, request.lessonId)
+                        val exerciseStatsRs = exerciseStatsStmt.executeQuery()
+
+                        var progress = 0
+                        if (exerciseStatsRs.next()) {
+                            val totalExercises = exerciseStatsRs.getInt("total_exercises")
+                            val completedExercises = exerciseStatsRs.getInt("completed_exercises")
+                            if (totalExercises > 0) {
+                                progress = ((completedExercises.toDouble() / totalExercises) * 100).toInt()
+                            }
+                        }
+
                         conn.prepareStatement("""
-                            WITH exercise_stats AS (
-                                SELECT 
-                                    COUNT(*) as total_exercises,
-                                    COUNT(CASE WHEN is_completed = true THEN 1 END) as completed_exercises
-                                FROM app.exercise
-                                LEFT JOIN app.exercise_progress 
-                                    ON exercise.id = exercise_progress.exercise_id 
-                                    AND exercise_progress.user_id = ?
-                                WHERE exercise.lesson_id = ?
-                            )
                             INSERT INTO app.user_lesson_progress (user_id, lesson_id, progress, last_attempt_at)
-                            SELECT 
-                                ?, ?,
-                                CASE 
-                                    WHEN es.total_exercises > 0 
-                                    THEN ROUND((es.completed_exercises::float / es.total_exercises) * 100) 
-                                    ELSE 0 
-                                END as progress,
-                                CURRENT_TIMESTAMP
-                            FROM exercise_stats es
+                            VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                             ON CONFLICT (user_id, lesson_id) DO UPDATE SET
-                                progress = CASE 
-                                    WHEN es.total_exercises > 0 
-                                    THEN ROUND((es.completed_exercises::float / es.total_exercises) * 100) 
-                                    ELSE 0 
-                                END,
+                                progress = EXCLUDED.progress,
                                 last_attempt_at = CURRENT_TIMESTAMP
                         """.trimIndent()).use { stmt ->
                             stmt.setLong(1, request.userId)
                             stmt.setLong(2, request.lessonId)
-                            stmt.setLong(3, request.userId)
-                            stmt.setLong(4, request.lessonId)
+                            stmt.setInt(3, progress)
                             stmt.executeUpdate()
                         }
                     }
@@ -976,7 +904,9 @@ fun Application.module() {
                             totalXp = totalXp,
                             dailyXp = dailyXp,
                             dailyGoal = dailyGoal,
-                            alreadyCompleted = false
+                            alreadyCompleted = false,
+                            streakCurrent = currentStreak,
+                            streakMax = maxStreak
                         )
                     )
                 }
@@ -1039,39 +969,39 @@ fun Application.module() {
 
                     // === ОБНОВЛЯЕМ ПРОГРЕСС УРОКА ===
                     // Вычисляем процент завершённых упражнений в уроке
+                    val exerciseStatsStmt = conn.prepareStatement("""
+                        SELECT
+                            COUNT(*) as total_exercises,
+                            COUNT(CASE WHEN ep.is_completed = true THEN 1 END) as completed_exercises
+                        FROM app.exercise e
+                        LEFT JOIN app.exercise_progress ep
+                            ON e.id = ep.exercise_id AND ep.user_id = ?
+                        WHERE e.lesson_id = ?
+                    """.trimIndent())
+                    exerciseStatsStmt.setLong(1, request.userId)
+                    exerciseStatsStmt.setLong(2, request.lessonId)
+                    val statsRs = exerciseStatsStmt.executeQuery()
+
+                    var progress = 0
+                    if (statsRs.next()) {
+                        val totalExercises = statsRs.getInt("total_exercises")
+                        val completedExercises = statsRs.getInt("completed_exercises")
+                        if (totalExercises > 0) {
+                            progress = ((completedExercises.toDouble() / totalExercises) * 100).toInt()
+                        }
+                    }
+
+                    // Обновляем прогресс урока
                     conn.prepareStatement("""
-                        WITH exercise_stats AS (
-                            SELECT 
-                                COUNT(*) as total_exercises,
-                                COUNT(CASE WHEN is_completed = true THEN 1 END) as completed_exercises
-                            FROM app.exercise
-                            LEFT JOIN app.exercise_progress 
-                                ON exercise.id = exercise_progress.exercise_id 
-                                AND exercise_progress.user_id = ?
-                            WHERE exercise.lesson_id = ?
-                        )
                         INSERT INTO app.user_lesson_progress (user_id, lesson_id, progress, last_attempt_at)
-                        SELECT 
-                            ?, ?,
-                            CASE 
-                                WHEN es.total_exercises > 0 
-                                THEN ROUND((es.completed_exercises::float / es.total_exercises) * 100) 
-                                ELSE 0 
-                            END as progress,
-                            CURRENT_TIMESTAMP
-                        FROM exercise_stats es
+                        VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                         ON CONFLICT (user_id, lesson_id) DO UPDATE SET
-                            progress = CASE 
-                                WHEN es.total_exercises > 0 
-                                THEN ROUND((es.completed_exercises::float / es.total_exercises) * 100) 
-                                ELSE 0 
-                            END,
+                            progress = EXCLUDED.progress,
                             last_attempt_at = CURRENT_TIMESTAMP
                     """.trimIndent()).use { stmt ->
                         stmt.setLong(1, request.userId)
                         stmt.setLong(2, request.lessonId)
-                        stmt.setLong(3, request.userId)
-                        stmt.setLong(4, request.lessonId)
+                        stmt.setInt(3, progress)
                         stmt.executeUpdate()
                     }
 

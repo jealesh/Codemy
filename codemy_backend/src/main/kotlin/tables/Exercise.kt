@@ -1,6 +1,8 @@
 package tables
 
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.kotlin.datetime.timestampWithTimeZone
 import org.jetbrains.exposed.sql.ReferenceOption
 
 /**
@@ -8,14 +10,16 @@ import org.jetbrains.exposed.sql.ReferenceOption
  * Каждое упражнение имеет свой тип и награду в XP
  */
 object Exercise : LongIdTable("app.exercise") {
-    val lessonId       = long("lesson_id").references(Lessons.id, onDelete = ReferenceOption.CASCADE)
-    val orderIndex     = integer("order_index")  // Порядок в уроке
-    val type           = varchar("type", 50)     // "theory", "oral_code", "matching", "programming"
-    val text           = text("text")            // Текст задания/вопрос
-    val correctAnswer  = varchar("correct_answer", 1000).nullable()
-    val options        = text("options").nullable()  // JSON array для matching
-    val xpReward       = integer("xp_reward").default(0)  // XP за выполнение
-    
+    val lessonId      = long("lesson_id").references(Lessons.id, onDelete = ReferenceOption.CASCADE)
+    val orderIndex    = integer("order_index")  // Порядок в уроке
+    val type          = varchar("type", 50)     // "theory", "oral_code", "matching", "programming"
+    val text          = text("text")            // Текст задания/вопрос
+    val correctAnswer = varchar("correct_answer", 1000).nullable()
+    val options       = text("options").nullable()  // JSON array для matching (хранится как текст)
+    val xpReward      = integer("xp_reward").default(0)  // XP за выполнение
+    val createdAt     = timestampWithTimeZone("created_at").nullable()
+    val updatedAt     = timestampWithTimeZone("updated_at").nullable()
+
     init {
         index(customIndexName = "idx_exercise_lesson_id", columns = arrayOf(lessonId))
         uniqueIndex(lessonId, orderIndex)

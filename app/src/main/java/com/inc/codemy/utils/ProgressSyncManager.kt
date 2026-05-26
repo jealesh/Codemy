@@ -43,7 +43,7 @@ object ProgressSyncManager {
             )
         }
 
-        return try {
+        val response = try {
             val request = ExerciseCompletionRequest(
                 userId = userId,
                 exerciseId = exerciseId,
@@ -63,6 +63,32 @@ object ProgressSyncManager {
                 alreadyCompleted = false
             )
         }
+
+        // Если XP начислены успешно, обновляем кэш
+        if (response.success && isCorrect && response.xpEarned > 0) {
+            // Обновляем кэш ежедневной цели
+            val currentGoal = UserDataCache.getDailyGoal(userId)
+            if (currentGoal != null) {
+                val updatedGoal = currentGoal.copy(
+                    current_xp = response.dailyXp,
+                    goal_xp = response.dailyGoal
+                )
+                UserDataCache.putDailyGoal(userId, updatedGoal)
+            }
+
+            // Обновляем кэш профиля (total_xp и streak)
+            val currentProfile = UserDataCache.getUserProfile(userId)
+            if (currentProfile != null) {
+                val updatedProfile = currentProfile.copy(
+                    total_xp = response.totalXp,
+                    streak_current = response.streakCurrent,
+                    streak_max = response.streakMax
+                )
+                UserDataCache.putUserProfile(userId, updatedProfile)
+            }
+        }
+
+        return response
     }
 
     /**
