@@ -3,6 +3,7 @@ package com.inc.codemy
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -56,6 +57,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
+        findViewById<View>(R.id.navUnderlineProfile).visibility = View.VISIBLE
+
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
             finish()

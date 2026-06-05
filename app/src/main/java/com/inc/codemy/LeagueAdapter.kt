@@ -18,7 +18,6 @@ class LeagueAdapter(
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view = convertView ?: LayoutInflater.from(parent?.context).inflate(R.layout.item_league_user, parent, false)
 
-        val rank = view.findViewById<TextView>(R.id.userRank)
         val name = view.findViewById<TextView>(R.id.userName)
         val xpWeekly = view.findViewById<TextView>(R.id.userXPWeekly)
         val avatar = view.findViewById<ImageView>(R.id.userAvatar)
@@ -26,7 +25,6 @@ class LeagueAdapter(
 
         val user = users[position]
 
-        rank.text = user.rank.toString()
         name.text = user.name
         xpWeekly.text = "${user.weeklyXP} XP"
 

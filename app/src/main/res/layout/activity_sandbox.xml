@@ -52,12 +52,6 @@
                     android:popupBackground="@color/colorBackgroundLight"
                     android:spinnerMode="dropdown" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Выбрать язык"
-                    android:src="@drawable/ic_arrow_drop_down"
-                    android:tint="#80FFFFFF" />
             </LinearLayout>
 
             <!-- Поле 1: Код -->
@@ -87,7 +81,7 @@
                 android:background="@drawable/bg_input_field"
                 android:fontFamily="@font/sourcecodepro"
                 android:gravity="top|start"
-                android:hint="📥 Входные данные..."
+                android:hint="Входные данные..."
                 android:inputType="textMultiLine"
                 android:padding="12dp"
                 android:textColor="@color/colorTextPrimary"

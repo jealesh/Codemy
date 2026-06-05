@@ -36,6 +36,15 @@
             android:fontFamily="@font/rubik"
             android:textColor="#80FFFFFF"
             android:layout_marginTop="2dp" />
+
+        <View
+            android:id="@+id/navUnderlineHome"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorSecondary"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible" />
     </LinearLayout>
 
     <LinearLayout
@@ -61,6 +70,15 @@
             android:fontFamily="@font/rubik"
             android:textColor="#80FFFFFF"
             android:layout_marginTop="2dp" />
+
+        <View
+            android:id="@+id/navUnderlineSandbox"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorSecondary"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible" />
     </LinearLayout>
 
     <LinearLayout
@@ -86,6 +104,15 @@
             android:fontFamily="@font/rubik"
             android:textColor="#80FFFFFF"
             android:layout_marginTop="2dp" />
+
+        <View
+            android:id="@+id/navUnderlineTrophy"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorSecondary"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible" />
     </LinearLayout>
 
     <LinearLayout
@@ -111,6 +138,15 @@
             android:fontFamily="@font/rubik"
             android:textColor="#80FFFFFF"
             android:layout_marginTop="2dp" />
+
+        <View
+            android:id="@+id/navUnderlineProfile"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorSecondary"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible" />
     </LinearLayout>
 
 </LinearLayout>

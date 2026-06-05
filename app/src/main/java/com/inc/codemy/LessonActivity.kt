@@ -124,8 +124,14 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
 
                 // Связываем TabLayout с ViewPager (номера карточек)
                 TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                    // Создаём custom view для таба
+                    // Создаём custom view для таба с фиксированным размером
                     val customView = layoutInflater.inflate(R.layout.tab_custom, tabLayout, false)
+                    customView.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        setMargins(4, 4, 4, 4)
+                    }
                     val textView = customView.findViewById<TextView>(R.id.tabText)
                     val underline = customView.findViewById<View>(R.id.tabUnderline)
 
@@ -171,6 +177,15 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
                             currentTabPosition = position
                             refreshAllTabs()
                         }
+                    }
+                })
+
+                // Синхронизируем табы при свайпе через ViewPager2
+                viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        currentTabPosition = position
+                        refreshAllTabs()
                     }
                 })
 
@@ -241,7 +256,10 @@ class LessonActivity : AppCompatActivity(), CompletionListener {
         val currentItem = viewPager.currentItem
         val adapter = viewPager.adapter
         if (adapter != null && currentItem < adapter.itemCount - 1) {
-            viewPager.setCurrentItem(currentItem + 1, true)
+            val nextItem = currentItem + 1
+            viewPager.setCurrentItem(nextItem, true)
+            // Прокручиваем таб, чтобы он был видим
+            tabLayout.getTabAt(nextItem)?.select()
         } else {
             Toast.makeText(this, "Урок завершён!", Toast.LENGTH_SHORT).show()
             finish()

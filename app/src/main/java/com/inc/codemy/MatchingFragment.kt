@@ -238,6 +238,7 @@ class MatchingFragment : Fragment() {
         textView.id = android.R.id.text1
         textView.text = text
         textView.textSize = 16f
+        textView.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_text_transparent)
         textView.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
         val typeface = requireContext().resources.getFont(R.font.rubik)
         textView.typeface = typeface

@@ -81,7 +81,7 @@
                 android:layout_height="16dp"
                 android:max="100"
                 android:progress="45"
-                android:progressTint="@color/colorAccent"
+                android:progressTint="@color/colorSecondary"
                 android:background="@drawable/bg_progress_track"
                 style="?android:attr/progressBarStyleHorizontal" />
 

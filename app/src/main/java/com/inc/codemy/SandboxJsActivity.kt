@@ -11,6 +11,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
+
 class SandboxJsActivity : AppCompatActivity() {
 
     private lateinit var languageSpinner: Spinner
@@ -68,13 +69,15 @@ class SandboxJsActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 isJSReady = true
-                outputResult.text = "✅ JavaScript готов к работе!"
+                outputResult.text = "JavaScript готов к работе!"
                 outputResult.setTextColor(ContextCompat.getColor(this@SandboxJsActivity, android.R.color.holo_green_light))
             }
         }
         webViewJS.loadUrl("file:///android_res/raw/js_runner.html")
 
         // Нижняя навигация
+        findViewById<View>(R.id.navUnderlineSandbox).visibility = View.VISIBLE
+
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
             finish()
@@ -102,13 +105,13 @@ class SandboxJsActivity : AppCompatActivity() {
             var stdin = inputStdin.text.toString().trim()
             
             if (code.isEmpty()) {
-                outputResult.text = "❗ Напиши код!"
+                outputResult.text = "Напиши код!"
                 outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
                 return@setOnClickListener
             }
 
             if (!isJSReady) {
-                outputResult.text = "⏳ JavaScript загружается...\nПодождите несколько секунд и попробуйте снова."
+                outputResult.text = "JavaScript загружается...\nПодождите несколько секунд и попробуйте снова."
                 outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_light))
                 return@setOnClickListener
             }
@@ -119,7 +122,7 @@ class SandboxJsActivity : AppCompatActivity() {
                 .replace("$", "\\$")
 
             // Выполняем JS с stdin
-            outputResult.text = "⏳ Выполняется...\nКод:\n$code\n\nВходные данные:\n$stdin\n\n--- Результат ---"
+            outputResult.text = "Выполняется...\nКод:\n$code\n\nВходные данные:\n$stdin\n\n--- Результат ---"
             outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_blue_light))
 
             webViewJS.evaluateJavascript("runJSWithInput(`$code`, `$stdin`)", { result ->

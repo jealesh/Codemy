@@ -10,6 +10,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
+
 class SandboxActivity : AppCompatActivity() {
 
     private lateinit var languageSpinner: Spinner
@@ -53,7 +54,7 @@ class SandboxActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 isPyodideReady = true
-                outputResult.text = "✅ Python готов к работе!"
+                outputResult.text = "Python готов к работе!"
                 outputResult.setTextColor(ContextCompat.getColor(this@SandboxActivity, android.R.color.holo_green_light))
             }
         }
@@ -71,6 +72,8 @@ class SandboxActivity : AppCompatActivity() {
         }
 
         // Нижняя навигация
+        findViewById<View>(R.id.navUnderlineSandbox).visibility = View.VISIBLE
+
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
             finish()
@@ -99,19 +102,19 @@ class SandboxActivity : AppCompatActivity() {
             val stdin = inputStdin.text.toString().trim()
 
             if (code.isEmpty()) {
-                outputResult.text = "❗ Напиши код!"
+                outputResult.text = "Напиши код!"
                 outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
                 return@setOnClickListener
             }
 
             if (!isPyodideReady) {
-                outputResult.text = "⏳ Python загружается...\nПодождите несколько секунд и попробуйте снова."
+                outputResult.text = "Python загружается...\nПодождите несколько секунд и попробуйте снова."
                 outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_orange_light))
                 return@setOnClickListener
             }
 
             // Выполняем Python с stdin
-            outputResult.text = "⏳ Выполняется..."
+            outputResult.text = "Выполняется..."
             outputResult.setTextColor(ContextCompat.getColor(this, android.R.color.holo_blue_light))
 
             webViewPyodide.evaluateJavascript("runPythonWithInput(`$code`, `$stdin`)", { result ->

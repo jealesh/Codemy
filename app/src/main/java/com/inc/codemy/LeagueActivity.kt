@@ -2,6 +2,7 @@ package com.inc.codemy
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
@@ -56,6 +57,8 @@ class LeagueActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
+        findViewById<View>(R.id.navUnderlineTrophy).visibility = View.VISIBLE
+
         findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
             startActivity(Intent(this, MainScreenActivity::class.java))
         }

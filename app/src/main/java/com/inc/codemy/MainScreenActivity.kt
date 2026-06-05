@@ -109,6 +109,8 @@ class MainScreenActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
+        findViewById<View>(R.id.navUnderlineHome).visibility = View.VISIBLE
+
         findViewById<LinearLayout>(R.id.navProfile).setOnClickListener {
             startActivity(Intent(this, ProfileActivity::class.java))
             finish()
@@ -167,12 +169,8 @@ class MainScreenActivity : AppCompatActivity() {
         val percentage = (currentDailyXp.toFloat() / dailyGoalXp * 100).toInt()
         textDailyGoal.text = "$currentDailyXp / $dailyGoalXp XP ($percentage%)"
 
-        // Меняем цвет прогресс бара при выполнении цели
         progressDailyGoal.progressDrawable.setTint(
-            getColor(
-                if (currentDailyXp >= dailyGoalXp) R.color.colorSuccess
-                else R.color.colorAccent
-            )
+            getColor(R.color.colorSecondary)
         )
     }
 

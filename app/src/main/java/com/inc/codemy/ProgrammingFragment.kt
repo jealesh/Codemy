@@ -190,14 +190,14 @@ class ProgrammingFragment : Fragment() {
                 if (expectedOutput.isNotEmpty()) {
                     if (cleanResult == expectedOutput.trim()) {
                         isTestPassed = true
-                        textTestResult.append("\n\nТест пройден!")
+                        textTestResult.append("\n\n✅ Тест пройден!")
                         textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_light))
                         textTestResult.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_result_success)
                         Toast.makeText(requireContext(), "Тест пройден!", Toast.LENGTH_SHORT).show()
                         btnRetry.visibility = View.GONE
                     } else {
                         isTestPassed = false
-                        textTestResult.append("\n\nВывод не совпадает с ожидаемым")
+                        textTestResult.append("\n\n❌ Вывод не совпадает с ожидаемым")
                         textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
                         textTestResult.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_result_error)
                         Toast.makeText(requireContext(), "Вывод не совпадает", Toast.LENGTH_SHORT).show()
@@ -248,52 +248,99 @@ class ProgrammingFragment : Fragment() {
         // Отправка на проверку
         btnSubmit.setOnClickListener {
             val code = inputCode.text.toString().trim()
+            val stdin = inputStdin.text.toString().trim()
 
             if (code.isEmpty()) {
                 Toast.makeText(requireContext(), "Введите код!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (expectedOutput.isNotEmpty() && !isTestPassed) {
-                Toast.makeText(
-                    requireContext(),
-                    "Сначала пройдите тест!\nСравните ваш вывод с ожидаемым.",
-                    Toast.LENGTH_LONG
-                ).show()
+            if (!isPyodideReady) {
+                Toast.makeText(requireContext(), "Python ещё загружается, подождите...", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Проверяем код на соответствие правильному ответу
-            if (code.equals(correct.trim(), ignoreCase = true)) {
-                isSolvedCorrectly = true
-                btnSubmit.isEnabled = false
-                btnSubmit.alpha = 0.5f
-                btnSubmit.text = "Выполнено"
-                btnRun.isEnabled = false
-                btnRun.alpha = 0.5f
-                btnSubmit.visibility = View.GONE
-                btnRun.visibility = View.GONE
-                btnNext.visibility = View.VISIBLE
-                btnRetry.visibility = View.VISIBLE
+            // Запускаем код через Pyodide и сравниваем вывод с expectedOutput
+            textTestLabel.visibility = View.VISIBLE
+            textTestResult.visibility = View.VISIBLE
+            textTestResult.text = "⏳ Проверка..."
+            textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.darker_gray))
 
-                // Отмечаем упражнение как выполненное
-                if (position >= 0) {
-                    (activity as? LessonActivity)?.adapter?.setCompleted(position, true)
-                }
+            webView.evaluateJavascript("runPythonWithInput(`$code`, `$stdin`)", { result ->
+                val cleanResult = result
+                    ?.replace("\"", "")
+                    ?.replace("\\n", "\n")
+                    ?.replace("\\r", "")
+                    ?.trim() ?: ""
 
-                // Синхронизируем прогресс и начисляем XP
-                if (!xpAwarded) {
-                    syncProgress(isCorrect = true)
-                    xpAwarded = true
+                // Проверяем совпадение с ожидаемым выводом
+                if (expectedOutput.isNotEmpty()) {
+                    if (cleanResult == expectedOutput.trim()) {
+                        isSolvedCorrectly = true
+                        isTestPassed = true
+                        btnSubmit.isEnabled = false
+                        btnSubmit.alpha = 0.5f
+                        btnSubmit.text = "Выполнено"
+                        btnRun.isEnabled = false
+                        btnRun.alpha = 0.5f
+                        btnSubmit.visibility = View.GONE
+                        btnRun.visibility = View.GONE
+                        btnNext.visibility = View.VISIBLE
+                        btnRetry.visibility = View.VISIBLE
+
+                        textTestResult.text = "✅ Вывод:\n$cleanResult\n\nТест пройден!"
+                        textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_light))
+                        textTestResult.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_result_success)
+
+                        // Отмечаем упражнение как выполненное
+                        if (position >= 0) {
+                            (activity as? LessonActivity)?.adapter?.setCompleted(position, true)
+                        }
+
+                        // Синхронизируем прогресс и начисляем XP
+                        if (!xpAwarded) {
+                            syncProgress(isCorrect = true)
+                            xpAwarded = true
+                        }
+                    } else {
+                        textTestResult.text = "❌ Вывод:\n$cleanResult\n\nОжидалось:\n${expectedOutput.trim()}"
+                        textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_light))
+                        textTestResult.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_result_error)
+                        Toast.makeText(requireContext(), "Вывод не совпадает с ожидаемым", Toast.LENGTH_LONG).show()
+                        btnRetry.visibility = View.VISIBLE
+                        btnNext.visibility = View.GONE
+
+                        // Записываем попытку без XP
+                        syncProgress(isCorrect = false)
+                    }
+                } else {
+                    // Если нет ожидаемого вывода, принимаем любой результат
+                    isSolvedCorrectly = true
+                    isTestPassed = true
+                    btnSubmit.isEnabled = false
+                    btnSubmit.alpha = 0.5f
+                    btnSubmit.text = "Выполнено"
+                    btnRun.isEnabled = false
+                    btnRun.alpha = 0.5f
+                    btnSubmit.visibility = View.GONE
+                    btnRun.visibility = View.GONE
+                    btnNext.visibility = View.VISIBLE
+                    btnRetry.visibility = View.VISIBLE
+
+                    textTestResult.text = "✅ Вывод:\n$cleanResult"
+                    textTestResult.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_green_light))
+                    textTestResult.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_result_success)
+
+                    if (position >= 0) {
+                        (activity as? LessonActivity)?.adapter?.setCompleted(position, true)
+                    }
+
+                    if (!xpAwarded) {
+                        syncProgress(isCorrect = true)
+                        xpAwarded = true
+                    }
                 }
-            } else {
-                Toast.makeText(requireContext(), "Код не совпадает с правильным решением", Toast.LENGTH_LONG).show()
-                btnRetry.visibility = View.VISIBLE
-                btnNext.visibility = View.GONE
-                
-                // Записываем попытку без XP
-                syncProgress(isCorrect = false)
-            }
+            })
         }
 
         btnNext.setOnClickListener {

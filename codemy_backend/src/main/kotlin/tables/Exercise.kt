@@ -16,6 +16,8 @@ object Exercise : LongIdTable("app.exercise") {
     val text          = text("text")            // Текст задания/вопрос
     val correctAnswer = varchar("correct_answer", 1000).nullable()
     val options       = text("options").nullable()  // JSON array для matching (хранится как текст)
+    val stdin         = text("stdin").nullable()          // входные данные для programming
+    val expectedOutput = text("expected_output").nullable() // ожидаемый вывод для programming
     val xpReward      = integer("xp_reward").default(0)  // XP за выполнение
     val createdAt     = timestampWithTimeZone("created_at").nullable()
     val updatedAt     = timestampWithTimeZone("updated_at").nullable()

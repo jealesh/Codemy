@@ -73,16 +73,16 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         app:tabMode="scrollable"
-        app:tabGravity="start"
+        app:tabGravity="center"
         app:tabIndicatorColor="@color/colorAccent"
         app:tabSelectedTextColor="@color/colorTextPrimary"
         app:tabTextColor="#80FFFFFF"
-        app:tabIndicatorHeight="4dp"
+        app:tabIndicatorHeight="0dp"
         app:tabBackground="@android:color/transparent"
-        app:tabMinWidth="48dp"
-        app:tabMaxWidth="64dp"
+        app:tabPaddingTop="8dp"
+        app:tabPaddingBottom="8dp"
         android:layout_marginBottom="8dp"
         android:background="@drawable/bg_text_transparent" />
 

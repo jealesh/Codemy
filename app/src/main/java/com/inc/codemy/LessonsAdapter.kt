@@ -4,10 +4,8 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -22,7 +20,6 @@ class LessonsAdapter : ListAdapter<Lesson, LessonsAdapter.LessonViewHolder>(Less
         val title: TextView = view.findViewById(R.id.textLessonTitle)
         val progress: TextView = view.findViewById(R.id.textLessonProgress)
         val progressCircle: ProgressBar = view.findViewById(R.id.progressLessonCircle)
-        val completionBadge: LinearLayout = view.findViewById(R.id.completionBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LessonViewHolder {
@@ -39,16 +36,8 @@ class LessonsAdapter : ListAdapter<Lesson, LessonsAdapter.LessonViewHolder>(Less
 
         android.util.Log.d("LessonsAdapter", "Урок: ${lesson.title}, Прогресс: ${lesson.progress}")
 
-        // Показываем бейдж успеха только для завершённых уроков (100%)
-        if (lesson.progress >= 100) {
-            holder.completionBadge.visibility = View.VISIBLE
-            holder.progress.visibility = View.GONE
-            holder.progressCircle.visibility = View.GONE
-        } else {
-            holder.completionBadge.visibility = View.GONE
-            holder.progress.visibility = View.VISIBLE
-            holder.progressCircle.visibility = View.VISIBLE
-        }
+        holder.progress.visibility = View.VISIBLE
+        holder.progressCircle.visibility = View.VISIBLE
 
         holder.itemView.setOnClickListener {
             val intent = Intent(holder.itemView.context, LessonActivity::class.java)

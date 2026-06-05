@@ -12,7 +12,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/"  // для эмулятора Android (localhost сервера)
+    private const val BASE_URL = "http://10.0.2.2:8080/"  // 10.0.2.2 (эмулятор)
     private const val CACHE_SIZE = 10 * 1024 * 1024L // 10 MB кэш
 
     private val json = Json { ignoreUnknownKeys = true }
